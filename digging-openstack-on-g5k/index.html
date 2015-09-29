@@ -54,7 +54,15 @@
 
         <div class="col-xs-2 col-sm-2 chart">
           <strong>Deployments per user</strong>
-          <div id="usersTable"></div>
+          <!--          <div id="usersTable"></div> -->
+          <table id="usersTable">
+            <thead>
+              <tr class="header">
+                <th>User</th>
+                <th># Jobs</th>
+              </tr>
+            </thead>
+          </table>
         </div>
 
         <div class="col-xs-4 col-sm-4">
@@ -247,8 +255,8 @@
             .group(function(d) {return d})
             .size(100)
             .columns([
-                'key',
-                'value'
+                function(d) {return d.key},
+                function(d) {return d.value}
                 ]
                 )
             .sortBy(function (d){return d.value})
