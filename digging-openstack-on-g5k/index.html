@@ -52,14 +52,15 @@
           </div>
         </div>
 
-        <div class="col-xs-2 col-sm-2 chart">
+        <div class="col-xs-3 col-sm-3 chart">
           <strong>Deployments per user</strong>
           <!--          <div id="usersTable"></div> -->
-          <table id="usersTable">
+          <table id="usersTable" class="table table-hover dc-data-table">
             <thead>
               <tr class="header">
                 <th>User</th>
                 <th># Jobs</th>
+                <th>Energy (W.h)</th>
               </tr>
             </thead>
           </table>
@@ -73,6 +74,10 @@
 
             <div id="totalUsers" class="chart">
               <strong># users</strong>
+            </div>
+
+            <div id="totalEnergyJobs" class="chart">
+              <strong>Energy (W.h)</strong>
             </div>
 
           </div>
@@ -127,6 +132,7 @@
     var usersTable = dc.dataTable('#usersTable');
     var totalJobs = dc.numberDisplay('#totalJobs');
     var totalUsers = dc.numberDisplay('#totalUsers');
+    var totalEnergyJobs = dc.numberDisplay('#totalEnergyJobs');
 
     d3.json("openstack.json", function(error, data) {
         allDatas = data;
@@ -198,7 +204,8 @@
           .group(clustersGroup)
           .elasticX(true)
           .label(function(d) {return d.key + "/" + d.value})
-          .labelOffsetX(-30);
+          .labelOffsetX(-30)
+          .xAxis().ticks(5);
 
         // nb nodes
         min = d3.min(data, function(d) { return d.assigned_nodes.length});
@@ -248,58 +255,74 @@
 
         // by chance we can group datas here ...
         usersDimension = ndx.dimension(function(d) {return d.user_uid});
-        usersGroup = usersDimension.group();
+        //usersGroup = usersDimension.group();
+        usersGroup = usersDimension.group().reduce(add, remove, init);
 
         usersTable /* dc.dataTable('.dc-data-table', 'chartGroup') */
             .dimension(usersGroup)
             .group(function(d) {return d})
             .size(100)
             .columns([
-                function(d) {return d.key},
-                function(d) {return d.value}
+                function(d) {return d.key.substring(0,8)},
+                function(d) {return d.value.jobs},
+                function(d) {return Math.round(d.value.energy)}
                 ]
                 )
-            .sortBy(function (d){return d.value})
+            .sortBy(function (d){return d.value.jobs})
             .order(d3.descending)
             .on('renderlet', function (table) {
               table.selectAll('.dc-table-label').style('visibility', 'hidden');
             });
           
-        totalUserGroup = usersDimension.groupAll().reduce(
-            function(p,v) {
-              p.jobs ++;
-              if (typeof(p[v.user_uid]) == "undefined" || p[v.user_uid] == 0){
-                p[v.user_uid] = 0
-                p.users ++
-              }
-              p[v.user_uid] ++
-              return p;
-            },
-            function(p,v) {
-            p.jobs --;
-            p[v.user_uid] --;
-            if (p[v.user_uid] == 0) {
-              p.users --;
-            }
-            return p;
-            },
-            function(){
-            return {
-            "jobs": 0,
-            "users":0
-            }
-            }
-        );
+        totalUserGroup = usersDimension.groupAll().reduce(add, remove, init);
         
         totalUsers.group(totalUserGroup)
           .valueAccessor(function(d){return d.users});
         totalJobs.group(totalUserGroup)
           .valueAccessor(function(d){return d.jobs});
+        totalEnergyJobs.group(totalUserGroup)
+          .valueAccessor(function(d){return d.energy});
 
 
         dc.renderAll();
     });
 
+var init = function(){
+  return {
+    "jobs": 0,
+    "users":0,
+    "energy":0
+  }
+}
+
+  var  add =  function(p,v) {
+    p.jobs ++;
+    if (typeof(p[v.user_uid]) == "undefined" || p[v.user_uid] == 0){
+      p[v.user_uid] = 0
+        p.users ++
+    }
+    p[v.user_uid] ++;
+    p["energy"] += computeEnergy(v);
+    return p;
+  }
+  var remove = function(p,v) {
+    p.jobs --;
+    p[v.user_uid] --;
+    p["energy"] -= computeEnergy(v);
+    if (p[v.user_uid] == 0) {
+      p.users --;
+    }
+    return p;
+  }
+
+function computeEnergy(d) {
+      var energy = d.assigned_nodes.length * (d.stopped_at - d.started_at) * 150 / 3600;
+      if (isNaN(energy)) {
+        // it seems that for atleast 2 records stopped_at is missing
+        return 0;
+      }
+      return energy;
+   }
   </script>
 </body>
 </html>
