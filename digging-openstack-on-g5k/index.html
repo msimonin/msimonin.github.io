@@ -28,34 +28,10 @@
 
       <div class="row">
 
-        <div class="col-xs-4 col-sm-4">
-
-          <div id="jobStartBar" class="chart">
-            <strong>OpenStack deployments per week</strong>
-            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
-            <a class="reset" href="javascript:jobStartBarChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-            <div class="clearfix"></div>
-          </div>  
-
-          <div id="nodesRow" class="chart">
-            <strong>Number of nodes used</strong>
-            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
-            <a class="reset" href="javascript:nodesChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-
-            <div class="clearfix"></div>
-          </div><!-- nodesRow -->
-          <div id="walltimeBar" class="chart">
-            <strong>Walltime used</strong>
-            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
-            <a class="reset" href="javascript:walltimeBarChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-            <div class="clearfix"></div>
-          </div>
-        </div>
-
-        <div class="col-xs-3 col-sm-3 chart">
+        <div class="col-xs-3 col-sm-2 chart">
           <strong>Deployments per user</strong>
           <!--          <div id="usersTable"></div> -->
-          <table id="usersTable" class="table table-hover dc-data-table">
+          <table id="usersTable" class="table-hover dc-data-table">
             <thead>
               <tr class="header">
                 <th>User</th>
@@ -106,6 +82,30 @@
             <div class="clearfix"></div>
           </div>
         </div> <!-- col -->
+
+        <div class="col-xs-4 col-sm-4">
+
+          <div id="jobStartBar" class="chart">
+            <strong>OpenStack deployments per week</strong>
+            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+            <a class="reset" href="javascript:jobStartBarChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+            <div class="clearfix"></div>
+          </div>
+
+          <div id="nodesRow" class="chart">
+            <strong>Number of nodes used</strong>
+            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+            <a class="reset" href="javascript:nodesChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+
+            <div class="clearfix"></div>
+          </div><!-- nodesRow -->
+          <div id="walltimeBar" class="chart">
+            <strong>Walltime used</strong>
+            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+            <a class="reset" href="javascript:walltimeBarChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+            <div class="clearfix"></div>
+          </div>
+        </div>
 
       </div> <!-- row -->
 
@@ -273,9 +273,9 @@
             .on('renderlet', function (table) {
               table.selectAll('.dc-table-label').style('visibility', 'hidden');
             });
-          
+
         totalUserGroup = usersDimension.groupAll().reduce(add, remove, init);
-        
+
         totalUsers.group(totalUserGroup)
           .valueAccessor(function(d){return d.users});
         totalJobs.group(totalUserGroup)
