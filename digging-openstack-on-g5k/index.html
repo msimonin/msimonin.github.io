@@ -25,13 +25,20 @@
     <div class="container-fluid" >
 
       <h1>Openstack jobs on Grid'5000</h1>
-
+      <div class="row">
+      <p>
+      Note : we present all the jobs that have been submitted with a name 
+      containing openstack or devstack (or some other names known to hide 
+      an openstack deployment). Thus this visualisation is not perfect 
+      and does not show all the openstack deployments on Grid'5000.
+      </p>
+      </div>
       <div class="row">
 
-        <div class="col-xs-3 col-sm-2 chart">
+        <div class="col-xs-3 col-sm-2">
           <strong>Deployments per user</strong>
           <!--          <div id="usersTable"></div> -->
-          <table id="usersTable" class="table-hover dc-data-table">
+          <table id="usersTable" class="table-hover dc-data-table chart">
             <thead>
               <tr class="header">
                 <th>User</th>
