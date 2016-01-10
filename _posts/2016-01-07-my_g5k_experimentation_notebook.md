@@ -18,7 +18,7 @@ ressources. The experimentation follows three steps :
 Here is the commented notebook  (the plot is at the very end)
 
 <!-- rendered using nbviewer -->
-<iframe width="100%" height="800px" src="http://nbviewer.ipython.org/github/msimonin/msimonin.github.io/blob/master/notebooks/g5k-uptime.ipynb" frameborder="0"></iframe>
+<iframe width="100%" height="800px" src="https://nbviewer.ipython.org/github/msimonin/msimonin.github.io/blob/master/notebooks/g5k-uptime.ipynb" frameborder="0"></iframe>
 
 
 
