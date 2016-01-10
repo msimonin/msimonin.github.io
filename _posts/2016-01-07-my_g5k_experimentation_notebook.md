@@ -15,10 +15,11 @@ ressources. The experimentation follows three steps :
 
 ## The notebook in details 
 
-Here is the commented notebook  (the plot is at the very end)
+Here is the commented notebook.
+Full rendered notebook is also available through [nbviewer service](http://nbviewer.ipython.org/github/msimonin/msimonin.github.io/blob/master/notebooks/g5k-uptime.ipynb)
 
 <!-- rendered using nbviewer -->
-<iframe width="100%" height="800px" src="https://nbviewer.ipython.org/github/msimonin/msimonin.github.io/blob/master/notebooks/g5k-uptime.ipynb" frameborder="0"></iframe>
+<iframe width="100%" height="800px" src="/notebooks/g5k-uptime.html" frameborder="0"></iframe>
 
 
 
