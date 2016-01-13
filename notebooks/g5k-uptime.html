@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>Untitled</title>
+<title>g5k-uptime</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
@@ -189,11 +189,11 @@ div#notebook {
 <div class=" highlight hl-ruby"><pre><span class="nb">require</span> <span class="s1">&#39;xp5k&#39;</span>
 <span class="n">myxp</span> <span class="o">=</span> <span class="no">XP5K</span><span class="o">::</span><span class="no">XP</span><span class="o">.</span><span class="n">new</span>
 <span class="n">myxp</span><span class="o">.</span><span class="n">define_job</span><span class="p">({</span>
-    <span class="ss">:resources</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="s1">&#39;nodes=10, walltime=1:00:00&#39;</span><span class="o">]</span><span class="p">,</span>
+    <span class="ss">:resources</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;nodes=50, walltime=1:00:00&quot;</span><span class="o">]</span><span class="p">,</span>
     <span class="ss">:site</span>      <span class="o">=&gt;</span> <span class="s1">&#39;lyon&#39;</span><span class="p">,</span>
     <span class="ss">:types</span>     <span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;allow_classic_ssh&quot;</span><span class="o">]</span><span class="p">,</span>
     <span class="ss">:name</span>      <span class="o">=&gt;</span> <span class="s2">&quot;iruby notebook&quot;</span> <span class="p">,</span>
-    <span class="ss">:roles</span>     <span class="o">=&gt;</span> <span class="o">[</span><span class="no">XP5K</span><span class="o">::</span><span class="no">Role</span><span class="o">.</span><span class="n">new</span><span class="p">({</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">&#39;mynode&#39;</span><span class="p">,</span> <span class="ss">:size</span> <span class="o">=&gt;</span> <span class="mi">10</span><span class="p">})</span><span class="o">]</span><span class="p">,</span>
+    <span class="ss">:roles</span>     <span class="o">=&gt;</span> <span class="o">[</span><span class="no">XP5K</span><span class="o">::</span><span class="no">Role</span><span class="o">.</span><span class="n">new</span><span class="p">({</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">&#39;mynode&#39;</span><span class="p">,</span> <span class="ss">:size</span> <span class="o">=&gt;</span> <span class="mi">50</span><span class="p">})</span><span class="o">]</span><span class="p">,</span>
     <span class="ss">:command</span>   <span class="o">=&gt;</span> <span class="s2">&quot;sleep 86400&quot;</span>
     <span class="p">})</span>
 </pre></div>
@@ -234,7 +234,7 @@ div#notebook {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>#&lt;Proc:0x007feec7a02068@/Users/msimonin/msimonin@github.com/xp5k/lib/xp5k/xp.rb:118&gt;</pre>
+<pre>#&lt;Proc:0x007fabaf947098@/Users/msimonin/msimonin@github.com/xp5k/lib/xp5k/xp.rb:118&gt;</pre>
 </div>
 
 </div>
@@ -260,7 +260,7 @@ div#notebook {
     <div class="input_area">
 <div class=" highlight hl-ruby"><pre><span class="nb">require</span> <span class="s1">&#39;xp5k/rake&#39;</span>
 <span class="n">h</span> <span class="o">=</span> <span class="n">on</span> <span class="n">roles</span><span class="p">(</span><span class="s1">&#39;mynode&#39;</span><span class="p">),</span> <span class="p">{</span><span class="ss">:user</span> <span class="o">=&gt;</span> <span class="s1">&#39;msimonin&#39;</span><span class="p">,</span> <span class="ss">:capture</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">}</span> <span class="k">do</span> 
-    <span class="s1">&#39;uptime -s&#39;</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;uptime -s&#39;</span><span class="o">]</span>
 <span class="k">end</span>
 </pre></div>
 
@@ -274,49 +274,215 @@ div#notebook {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Connected to sagittaire-50.lyon.grid5000.fr...
+<pre>Connected to sagittaire-18.lyon.grid5000.fr...
+Connected to sagittaire-20.lyon.grid5000.fr...
+Connected to sagittaire-2.lyon.grid5000.fr...
+Connected to sagittaire-22.lyon.grid5000.fr...
+Connected to sagittaire-28.lyon.grid5000.fr...
+Connected to sagittaire-3.lyon.grid5000.fr...
+Connected to sagittaire-29.lyon.grid5000.fr...
+Connected to sagittaire-30.lyon.grid5000.fr...
+Connected to sagittaire-24.lyon.grid5000.fr...
+Connected to sagittaire-19.lyon.grid5000.fr...
+Connected to sagittaire-33.lyon.grid5000.fr...
+Connected to sagittaire-31.lyon.grid5000.fr...
+Connected to sagittaire-32.lyon.grid5000.fr...
+Connected to sagittaire-34.lyon.grid5000.fr...
+Connected to sagittaire-46.lyon.grid5000.fr...
+Connected to sagittaire-47.lyon.grid5000.fr...
+Connected to sagittaire-5.lyon.grid5000.fr...
+Connected to sagittaire-50.lyon.grid5000.fr...
 Connected to sagittaire-53.lyon.grid5000.fr...
 Connected to sagittaire-55.lyon.grid5000.fr...
-Connected to sagittaire-52.lyon.grid5000.fr...
-Connected to sagittaire-58.lyon.grid5000.fr...
 Connected to sagittaire-56.lyon.grid5000.fr...
+Connected to sagittaire-57.lyon.grid5000.fr...
+Connected to sagittaire-58.lyon.grid5000.fr...
+Connected to sagittaire-59.lyon.grid5000.fr...
+Connected to sagittaire-6.lyon.grid5000.fr...
+Connected to sagittaire-64.lyon.grid5000.fr...
+Connected to sagittaire-66.lyon.grid5000.fr...
+Connected to sagittaire-65.lyon.grid5000.fr...
+Connected to sagittaire-67.lyon.grid5000.fr...
+Connected to sagittaire-69.lyon.grid5000.fr...
+Connected to sagittaire-7.lyon.grid5000.fr...
+Connected to sagittaire-71.lyon.grid5000.fr...
+Connected to sagittaire-72.lyon.grid5000.fr...
+Connected to sagittaire-74.lyon.grid5000.fr...
+Connected to sagittaire-75.lyon.grid5000.fr...
+Connected to sagittaire-77.lyon.grid5000.fr...
+Connected to sagittaire-78.lyon.grid5000.fr...
 Connected to sagittaire-9.lyon.grid5000.fr...
+[stdout][sagittaire-3.lyon.grid5000.fr] 2016-01-13 23:33:27
+
+[command][sagittaire-31.lyon.grid5000.fr] uptime -s
+[command][sagittaire-42.lyon.grid5000.fr] uptime -s
+[command][sagittaire-45.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-31.lyon.grid5000.fr] 2016-01-13 23:33:48
+
+[command][sagittaire-46.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-34.lyon.grid5000.fr] 2016-01-13 23:33:28
+
+[command][sagittaire-48.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-33.lyon.grid5000.fr] 2016-01-13 23:33:47
+
+[command][sagittaire-49.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-38.lyon.grid5000.fr] 2016-01-13 23:33:29
+
+[command][sagittaire-5.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-39.lyon.grid5000.fr] 2016-01-13 23:33:30
+
 [command][sagittaire-50.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-4.lyon.grid5000.fr] 2016-01-13 23:33:27
+
 [command][sagittaire-52.lyon.grid5000.fr] uptime -s
-[command][sagittaire-55.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-42.lyon.grid5000.fr] 2016-01-13 22:36:21
+
+[command][sagittaire-53.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-48.lyon.grid5000.fr] 2016-01-13 23:33:29
+
 [command][sagittaire-58.lyon.grid5000.fr] uptime -s
-[command][sagittaire-59.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-56.lyon.grid5000.fr] 2016-01-13 23:33:34
+
+[command][sagittaire-67.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-57.lyon.grid5000.fr] 2016-01-13 23:33:33
+
+[command][sagittaire-69.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-58.lyon.grid5000.fr] 2016-01-13 23:33:34
+
+[command][sagittaire-7.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-6.lyon.grid5000.fr] 2016-01-13 23:33:27
+
+[command][sagittaire-71.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-63.lyon.grid5000.fr] 2016-01-13 23:33:32
+
+[stdout][sagittaire-64.lyon.grid5000.fr] 2016-01-13 23:33:33
+
+[command][sagittaire-72.lyon.grid5000.fr] uptime -s
+[command][sagittaire-74.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-65.lyon.grid5000.fr] 2016-01-13 23:33:32
+
+[command][sagittaire-75.lyon.grid5000.fr] uptime -s
+[command][sagittaire-77.lyon.grid5000.fr] uptime -s
+[stdout][sagittaire-59.lyon.grid5000.fr] 2016-01-13 23:33:33
+
+[command][sagittaire-78.lyon.grid5000.fr] uptime -s
 [command][sagittaire-9.lyon.grid5000.fr] uptime -s
----- sagittaire-50.lyon.grid5000.fr ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2016-01-10 23:50:35
+[stdout][sagittaire-7.lyon.grid5000.fr] 2016-01-13 23:33:28
 
----- sagittaire-52.lyon.grid5000.fr ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2016-01-10 23:39:09
+[stdout][sagittaire-71.lyon.grid5000.fr] 2016-01-13 23:33:49
 
----- sagittaire-53.lyon.grid5000.fr ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2016-01-10 23:50:35
+[stdout][sagittaire-72.lyon.grid5000.fr] 2016-01-13 23:33:51
 
----- sagittaire-54.lyon.grid5000.fr ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2016-01-10 23:50:36
+[stdout][sagittaire-74.lyon.grid5000.fr] 2016-01-13 19:25:06
 
----- sagittaire-55.lyon.grid5000.fr ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2016-01-10 23:52:11
+[stdout][sagittaire-75.lyon.grid5000.fr] 2016-01-13 23:33:53
 
----- sagittaire-56.lyon.grid5000.fr ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2016-01-10 23:50:37
+[stdout][sagittaire-77.lyon.grid5000.fr] 2016-01-13 23:33:50
 
----- sagittaire-57.lyon.grid5000.fr ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2016-01-10 18:29:52
+[stdout][sagittaire-78.lyon.grid5000.fr] 2016-01-13 23:33:49
 
----- sagittaire-58.lyon.grid5000.fr ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2016-01-10 23:50:36
+[stdout][sagittaire-9.lyon.grid5000.fr] 2016-01-13 23:33:29
 
----- sagittaire-59.lyon.grid5000.fr ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2016-01-10 23:50:37
-
----- sagittaire-9.lyon.grid5000.fr -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-2016-01-10 23:50:32
-
+---- sagittaire-18.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 17:46:48&quot;]
+---- sagittaire-19.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:28&quot;]
+---- sagittaire-2.lyon.grid5000.fr ------------------------------------------------------------------
+[&quot;2016-01-13 17:47:00&quot;]
+---- sagittaire-20.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:28&quot;]
+---- sagittaire-22.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:40&quot;]
+---- sagittaire-24.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:28&quot;]
+---- sagittaire-28.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:31&quot;]
+---- sagittaire-29.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:32&quot;]
+---- sagittaire-3.lyon.grid5000.fr ------------------------------------------------------------------
+[&quot;2016-01-13 23:33:27&quot;]
+---- sagittaire-30.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:31&quot;]
+---- sagittaire-31.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:48&quot;]
+---- sagittaire-32.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:31&quot;]
+---- sagittaire-33.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:47&quot;]
+---- sagittaire-34.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:28&quot;]
+---- sagittaire-38.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:29&quot;]
+---- sagittaire-39.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:30&quot;]
+---- sagittaire-4.lyon.grid5000.fr ------------------------------------------------------------------
+[&quot;2016-01-13 23:33:27&quot;]
+---- sagittaire-42.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 22:36:21&quot;]
+---- sagittaire-43.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:28&quot;]
+---- sagittaire-45.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:29&quot;]
+---- sagittaire-46.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:29&quot;]
+---- sagittaire-47.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:30&quot;]
+---- sagittaire-48.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:29&quot;]
+---- sagittaire-49.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 19:17:10&quot;]
+---- sagittaire-5.lyon.grid5000.fr ------------------------------------------------------------------
+[&quot;2016-01-13 23:33:27&quot;]
+---- sagittaire-50.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:29&quot;]
+---- sagittaire-52.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:29&quot;]
+---- sagittaire-53.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:30&quot;]
+---- sagittaire-54.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:31&quot;]
+---- sagittaire-55.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:33&quot;]
+---- sagittaire-56.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:34&quot;]
+---- sagittaire-57.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:33&quot;]
+---- sagittaire-58.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:34&quot;]
+---- sagittaire-59.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:33&quot;]
+---- sagittaire-6.lyon.grid5000.fr ------------------------------------------------------------------
+[&quot;2016-01-13 23:33:27&quot;]
+---- sagittaire-61.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:34&quot;]
+---- sagittaire-63.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:32&quot;]
+---- sagittaire-64.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:33&quot;]
+---- sagittaire-65.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:32&quot;]
+---- sagittaire-66.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:33&quot;]
+---- sagittaire-67.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:32&quot;]
+---- sagittaire-69.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:33&quot;]
+---- sagittaire-7.lyon.grid5000.fr ------------------------------------------------------------------
+[&quot;2016-01-13 23:33:28&quot;]
+---- sagittaire-71.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:49&quot;]
+---- sagittaire-72.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:51&quot;]
+---- sagittaire-74.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 19:25:06&quot;]
+---- sagittaire-75.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:53&quot;]
+---- sagittaire-77.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:50&quot;]
+---- sagittaire-78.lyon.grid5000.fr -----------------------------------------------------------------
+[&quot;2016-01-13 23:33:49&quot;]
+---- sagittaire-9.lyon.grid5000.fr ------------------------------------------------------------------
+[&quot;2016-01-13 23:33:29&quot;]
 Closing ssh connections...
 </pre>
 </div>
@@ -326,7 +492,7 @@ Closing ssh connections...
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&quot;sagittaire-52.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-10 23:39:09&quot;], &quot;sagittaire-50.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-10 23:50:35&quot;], &quot;sagittaire-53.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-10 23:50:35&quot;], &quot;sagittaire-56.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-10 23:50:37&quot;], &quot;sagittaire-54.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-10 23:50:36&quot;], &quot;sagittaire-55.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-10 23:52:11&quot;], &quot;sagittaire-58.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-10 23:50:36&quot;], &quot;sagittaire-57.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-10 18:29:52&quot;], &quot;sagittaire-59.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-10 23:50:37&quot;], &quot;sagittaire-9.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-10 23:50:32&quot;]}</pre>
+<pre>{&quot;sagittaire-3.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:27&quot;], &quot;sagittaire-2.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 17:47:00&quot;], &quot;sagittaire-18.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 17:46:48&quot;], &quot;sagittaire-22.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:40&quot;], &quot;sagittaire-28.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:31&quot;], &quot;sagittaire-30.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:31&quot;], &quot;sagittaire-24.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:28&quot;], &quot;sagittaire-20.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:28&quot;], &quot;sagittaire-19.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:28&quot;], &quot;sagittaire-29.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:32&quot;], &quot;sagittaire-31.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:48&quot;], &quot;sagittaire-34.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:28&quot;], &quot;sagittaire-32.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:31&quot;], &quot;sagittaire-33.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:47&quot;], &quot;sagittaire-38.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:29&quot;], &quot;sagittaire-39.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:30&quot;], &quot;sagittaire-4.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:27&quot;], &quot;sagittaire-42.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 22:36:21&quot;], &quot;sagittaire-45.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:29&quot;], &quot;sagittaire-43.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:28&quot;], &quot;sagittaire-46.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:29&quot;], &quot;sagittaire-47.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:30&quot;], &quot;sagittaire-48.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:29&quot;], &quot;sagittaire-49.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 19:17:10&quot;], &quot;sagittaire-5.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:27&quot;], &quot;sagittaire-52.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:29&quot;], &quot;sagittaire-50.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:29&quot;], &quot;sagittaire-53.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:30&quot;], &quot;sagittaire-54.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:31&quot;], &quot;sagittaire-55.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:33&quot;], &quot;sagittaire-56.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:34&quot;], &quot;sagittaire-57.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:33&quot;], &quot;sagittaire-58.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:34&quot;], &quot;sagittaire-6.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:27&quot;], &quot;sagittaire-63.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:32&quot;], &quot;sagittaire-64.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:33&quot;], &quot;sagittaire-65.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:32&quot;], &quot;sagittaire-66.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:33&quot;], &quot;sagittaire-61.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:34&quot;], &quot;sagittaire-59.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:33&quot;], &quot;sagittaire-67.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:32&quot;], &quot;sagittaire-69.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:33&quot;], &quot;sagittaire-7.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:28&quot;], &quot;sagittaire-71.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:49&quot;], &quot;sagittaire-72.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:51&quot;], &quot;sagittaire-74.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 19:25:06&quot;], &quot;sagittaire-75.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:53&quot;], &quot;sagittaire-77.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:50&quot;], &quot;sagittaire-78.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:49&quot;], &quot;sagittaire-9.lyon.grid5000.fr&quot;=&gt;[&quot;2016-01-13 23:33:29&quot;]}</pre>
 </div>
 
 </div>
@@ -420,7 +586,7 @@ require(['d3'], function(d3){window['d3']=d3;console.log('finished loading d3');
 <div class="output_area"><div class="prompt output_prompt">Out[4]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
-<table><tr><th>host</th><th>uptime</th></tr><tr><td>sagittaire-52</td><td>37.85</td></tr><tr><td>sagittaire-50</td><td>26.42</td></tr><tr><td>sagittaire-53</td><td>26.42</td></tr><tr><td>sagittaire-56</td><td>26.38</td></tr><tr><td>sagittaire-54</td><td>26.4</td></tr><tr><td>sagittaire-55</td><td>24.82</td></tr><tr><td>sagittaire-58</td><td>26.4</td></tr><tr><td>sagittaire-57</td><td>347.13</td></tr><tr><td>sagittaire-59</td><td>26.38</td></tr><tr><td>sagittaire-9</td><td>26.47</td></tr></table>
+<table><tr><th>host</th><th>uptime</th></tr><tr><td>sagittaire-3</td><td>39.43</td></tr><tr><td>sagittaire-2</td><td>385.88</td></tr><tr><td>sagittaire-18</td><td>386.08</td></tr><tr><td>sagittaire-22</td><td>39.22</td></tr><tr><td>sagittaire-28</td><td>39.37</td></tr><tr><td>sagittaire-30</td><td>39.37</td></tr><tr><td>sagittaire-24</td><td>39.42</td></tr><tr><td>sagittaire-20</td><td>39.42</td></tr><tr><td>sagittaire-19</td><td>39.42</td></tr><tr><td>sagittaire-29</td><td>39.35</td></tr><tr><td>sagittaire-31</td><td>39.08</td></tr><tr><td>sagittaire-34</td><td>39.42</td></tr><tr><td>sagittaire-32</td><td>39.37</td></tr><tr><td>sagittaire-33</td><td>39.1</td></tr><tr><td>sagittaire-38</td><td>39.4</td></tr><tr><td>sagittaire-39</td><td>39.38</td></tr><tr><td>...</td><td>...</td></tr><tr><td>sagittaire-9</td><td>39.4</td></tr></table>
 </div>
 
 </div>
@@ -438,7 +604,7 @@ require(['d3'], function(d3){window['d3']=d3;console.log('finished loading d3');
 <span class="n">plot</span><span class="o">.</span><span class="n">add_with_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="ss">:bar</span><span class="p">,</span> <span class="ss">:host</span><span class="p">,</span> <span class="ss">:uptime</span><span class="p">)</span>
 <span class="n">plot</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span>
     <span class="n">x_label</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="n">y_label</span><span class="p">(</span><span class="s1">&#39;Uptime (ms)&#39;</span><span class="p">)</span>
+    <span class="n">y_label</span><span class="p">(</span><span class="s1">&#39;Uptime (min)&#39;</span><span class="p">)</span>
     <span class="n">rotate_x_label</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">)</span>
 <span class="k">end</span>
 </pre></div>
@@ -454,12 +620,12 @@ require(['d3'], function(d3){window['d3']=d3;console.log('finished loading d3');
 <div class="output_area"><div class="prompt output_prompt">Out[5]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
-<div id='vis-4b3a1df0-ec94-4911-a5c4-13218ddcf2f8'></div>
+<div id='vis-063f219a-3494-42bb-a15f-2b4cfe25fb9c'></div>
 <script>
 (function(){
     var render = function(){
-        var model = {"panes":[{"diagrams":[{"type":"bar","options":{"x":"host","y":"uptime"},"data":"3b3ad416-2683-4133-ae97-05cb574c5d28"}],"options":{"x_label":"","y_label":"Uptime (ms)","rotate_x_label":-90,"width":700,"xrange":["sagittaire-52","sagittaire-50","sagittaire-53","sagittaire-56","sagittaire-54","sagittaire-55","sagittaire-58","sagittaire-57","sagittaire-59","sagittaire-9"],"yrange":[0,347.13]}}],"data":{"3b3ad416-2683-4133-ae97-05cb574c5d28":[{"host":"sagittaire-52","uptime":37.85},{"host":"sagittaire-50","uptime":26.42},{"host":"sagittaire-53","uptime":26.42},{"host":"sagittaire-56","uptime":26.38},{"host":"sagittaire-54","uptime":26.4},{"host":"sagittaire-55","uptime":24.82},{"host":"sagittaire-58","uptime":26.4},{"host":"sagittaire-57","uptime":347.13},{"host":"sagittaire-59","uptime":26.38},{"host":"sagittaire-9","uptime":26.47}]},"extension":[]}
-        var id_name = '#vis-4b3a1df0-ec94-4911-a5c4-13218ddcf2f8';
+        var model = {"panes":[{"diagrams":[{"type":"bar","options":{"x":"host","y":"uptime"},"data":"6f217fab-34eb-43b0-b2f2-e3cbc884a282"}],"options":{"x_label":"","y_label":"Uptime (min)","rotate_x_label":-90,"width":700,"xrange":["sagittaire-3","sagittaire-2","sagittaire-18","sagittaire-22","sagittaire-28","sagittaire-30","sagittaire-24","sagittaire-20","sagittaire-19","sagittaire-29","sagittaire-31","sagittaire-34","sagittaire-32","sagittaire-33","sagittaire-38","sagittaire-39","sagittaire-4","sagittaire-42","sagittaire-45","sagittaire-43","sagittaire-46","sagittaire-47","sagittaire-48","sagittaire-49","sagittaire-5","sagittaire-52","sagittaire-50","sagittaire-53","sagittaire-54","sagittaire-55","sagittaire-56","sagittaire-57","sagittaire-58","sagittaire-6","sagittaire-63","sagittaire-64","sagittaire-65","sagittaire-66","sagittaire-61","sagittaire-59","sagittaire-67","sagittaire-69","sagittaire-7","sagittaire-71","sagittaire-72","sagittaire-74","sagittaire-75","sagittaire-77","sagittaire-78","sagittaire-9"],"yrange":[0,386.08]}}],"data":{"6f217fab-34eb-43b0-b2f2-e3cbc884a282":[{"host":"sagittaire-3","uptime":39.43},{"host":"sagittaire-2","uptime":385.88},{"host":"sagittaire-18","uptime":386.08},{"host":"sagittaire-22","uptime":39.22},{"host":"sagittaire-28","uptime":39.37},{"host":"sagittaire-30","uptime":39.37},{"host":"sagittaire-24","uptime":39.42},{"host":"sagittaire-20","uptime":39.42},{"host":"sagittaire-19","uptime":39.42},{"host":"sagittaire-29","uptime":39.35},{"host":"sagittaire-31","uptime":39.08},{"host":"sagittaire-34","uptime":39.42},{"host":"sagittaire-32","uptime":39.37},{"host":"sagittaire-33","uptime":39.1},{"host":"sagittaire-38","uptime":39.4},{"host":"sagittaire-39","uptime":39.38},{"host":"sagittaire-4","uptime":39.43},{"host":"sagittaire-42","uptime":96.53},{"host":"sagittaire-45","uptime":39.4},{"host":"sagittaire-43","uptime":39.42},{"host":"sagittaire-46","uptime":39.4},{"host":"sagittaire-47","uptime":39.38},{"host":"sagittaire-48","uptime":39.4},{"host":"sagittaire-49","uptime":295.72},{"host":"sagittaire-5","uptime":39.43},{"host":"sagittaire-52","uptime":39.4},{"host":"sagittaire-50","uptime":39.4},{"host":"sagittaire-53","uptime":39.38},{"host":"sagittaire-54","uptime":39.37},{"host":"sagittaire-55","uptime":39.33},{"host":"sagittaire-56","uptime":39.32},{"host":"sagittaire-57","uptime":39.33},{"host":"sagittaire-58","uptime":39.32},{"host":"sagittaire-6","uptime":39.43},{"host":"sagittaire-63","uptime":39.35},{"host":"sagittaire-64","uptime":39.33},{"host":"sagittaire-65","uptime":39.35},{"host":"sagittaire-66","uptime":39.33},{"host":"sagittaire-61","uptime":39.32},{"host":"sagittaire-59","uptime":39.33},{"host":"sagittaire-67","uptime":39.35},{"host":"sagittaire-69","uptime":39.33},{"host":"sagittaire-7","uptime":39.42},{"host":"sagittaire-71","uptime":39.07},{"host":"sagittaire-72","uptime":39.03},{"host":"sagittaire-74","uptime":287.78},{"host":"sagittaire-75","uptime":39.0},{"host":"sagittaire-77","uptime":39.05},{"host":"sagittaire-78","uptime":39.07},{"host":"sagittaire-9","uptime":39.4}]},"extension":[]}
+        var id_name = '#vis-063f219a-3494-42bb-a15f-2b4cfe25fb9c';
         Nyaplot.core.parse(model, id_name);
 
         require(['downloadable'], function(downloadable){
