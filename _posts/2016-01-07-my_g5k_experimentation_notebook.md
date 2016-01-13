@@ -22,5 +22,26 @@ Full rendered notebook is also available through [nbviewer service](http://nbvie
 <iframe width="100%" height="800px" src="/notebooks/g5k-uptime.html" frameborder="0"></iframe>
 
 
+## Installation
+
+Here comes the tricky part (no so much actually). My setup was : 
+
+* Ruby 2.1.2
+* IPython 4.0.1 with notebook installed
+* The Gemfile (```xp5k``` and ```restfully``` need a small patch each):
+
+{% highlight ruby %}
+source 'https://rubygems.org'
+
+gem 'restfully',
+  :git => 'https://github.com/msimonin/restfully',
+  :branch => 'ripl-update'
+gem 'xp5k',
+  :path => '/Users/msimonin/msimonin@github.com/xp5k',
+  :branch => 'dsl_capture'
+gem 'rbczmq'
+gem 'iruby'
+gem 'nyaplot'
+{% endhighlight %}
 
 
