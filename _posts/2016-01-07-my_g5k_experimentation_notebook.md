@@ -9,8 +9,10 @@ This articles shows a simple use of [iruby
 notebook](https://github.com/SciRuby/iruby) for interacting with Grid'5000
 ressources. The experimentation follows three steps :
 
-1. Get some ressources on Grid'5000 2. Get the uptime of all the nodes of the
-reservation 3. Draw a bar plot showing the different uptime of the nodes
+1. Get some ressources on Grid'5000
+2. Get the uptime of all the nodes of the
+reservation 
+3. Draw a bar plot showing the different uptime of the nodes
 
 Check the docker image for a quick try : [Docker image](#installation)
 
@@ -27,15 +29,24 @@ Check the docker image for a quick try : [Docker image](#installation)
 
   Here comes the tricky part (no so much actually). My setup was : 
 
-  * Ruby 2.1.2 IPython 4.0.1 with notebook installed The Gemfile (```xp5k``` and
-  * ```restfully``` need a small patch each): and ... an account on Grid'5000.
+  * Ruby 2.1.2 IPython 4.0.1 with notebook installed
+  * The Gemfile (```xp5k``` and ```restfully``` need a small patch each)
+  * and ... an account on Grid'5000.
 
 {% highlight ruby %}
+
 source 'https://rubygems.org'
 
-gem 'restfully', :git => 'https://github.com/msimonin/restfully', :branch =>
-'ripl-update' gem 'xp5k', :path => '/Users/msimonin/msimonin@github.com/xp5k',
-:branch => 'dsl_capture' gem 'rbczmq' gem 'iruby' gem 'nyaplot'
+gem 'restfully',
+  :git => 'https://github.com/msimonin/restfully',
+  :branch => 'ripl-update'
+gem 'xp5k', 
+  :path => 'https://github.com/msimonin/xp5k',
+  :branch => 'dsl_capture'
+gem 'ffi-rzmq' 
+gem 'iruby' 
+gem 'nyaplot'
+
 {% endhighlight %}
 
 ### Docker image
