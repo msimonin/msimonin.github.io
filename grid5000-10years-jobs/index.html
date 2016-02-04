@@ -20,6 +20,10 @@
   max-width:200px;
 }
 
+.site {
+  font-weight: bold;
+}
+
 </style>
 <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="stylesheets/jquery-ui.css">
@@ -49,7 +53,7 @@
         get the datas, I'll be please to add them here :)
       </p>
       <p>
-        The process to retrieve the datas is split in three scripts : 
+        The process to retrieve the datas is split in three scripts :
         <ul>
           <li>Get the start_time of every jobs on each site : <a href="jobs.rb">jobs.rb</a></li>
           <li>Count the number of jobs per months for each sites: <a href="groups.rb">groups.rb</a></li>
@@ -60,7 +64,7 @@
   </div>
   <div class="footer">
     Matthieu Simonin - inspired by <a href="http://www.nytimes.com/interactive/2012/02/13/us/politics/2013-budget-proposal-graphic.html?_r=0">Four Ways to Slice Obama’s 2013 Budget Proposal</a>
-    - using <a href="http://d3js.org/">d3.js</a> and <a href="http://bl.ocks.org/mbostock/1021953">Multi-Foci Force Layout</a>.
+    and <a href="http://bl.ocks.org/mbostock/1021953">Multi-Foci Force Layout</a> - using <a href="http://d3js.org/">d3.js</a>
   </div>
 </div>
 
@@ -74,7 +78,7 @@ var sites = [];
 var nodes = [];
 var reorder = false;
 var width = 800,
-    height = 800,
+    height = 1000,
     speed = 1100;
 
     $(function() {
@@ -197,7 +201,7 @@ var width = 800,
         .attr("x", function(d) {return foci_names[scale(d)].x })
         .attr("y", function(d) {return foci_names[scale(d)].y })
         .text(function(d) {return d})
-        .style("font-size", 20);
+        .style("font-size", 16);
 
       function tick(e) {
         var k = .1 * e.alpha;
@@ -281,6 +285,7 @@ var width = 800,
          site.transition().duration(speed)
            .attr("x", function(d) {return foci_names[scale(d)].x})
            .attr("y", function(d) {return foci_names[scale(d)].y})
+           .style("font-size", 16);
 
          force.start();
 
@@ -311,6 +316,7 @@ var width = 800,
            .style('font-size', 12);
 
 
+
          // move existing to axis display
          node.transition().duration(speed)
          .attr("cx", function(d,i) {
@@ -321,7 +327,7 @@ var width = 800,
 
          })
          .attr("cy", function(d,i) {
-           var y = 220 * yScale(d.month) + 20 * scale(d.site);
+           var y = (sites.length + 1) * 25  * yScale(d.month) + 25 * scale(d.site);
            // reinit the force layout position
            d.y = y
            return y
@@ -339,7 +345,7 @@ var width = 800,
              .transition().duration(speed)
              .attr("cx", function(d) { return 50 + xScale(d.month); })
              .attr("cy", function(d,i) {
-               return 220 * yScale(d.month) + 20 * scale(d.site)
+               return (sites.length + 1) * 25 * yScale(d.month) + 25 * scale(d.site)
              })
              .attr("r", function(d){
                return 20* Math.sqrt(d.jobs / maxJobs[d.site]);

@@ -1,7 +1,7 @@
 require 'json'
 require 'time'
 
-sites=%w(nantes rennes lyon nancy sophia reims grenoble lille luxembourg)
+sites=%w(nantes rennes lyon nancy sophia reims grenoble lille luxembourg bordeaux orsay toulouse)
 
 sites.each do |site|
   puts "---------------------------"
