@@ -204,33 +204,51 @@
 
         //jobStart Last month chart
         // 30 oct 2011
-        maxLastMonth = d3.max(data, function(d){return d.started_at}); //in seconds
-        minLastMonth = maxLastMonth - 3600 * 24 * 31
         width = 3600*24;
-        jobStartLastMonthBarDimension = ndx.dimension(function(d) {if (d.started_at<minLastMonth) return 0; return Math.round(d.started_at/(width)) * width; });
+        maxLastMonth = d3.max(data, function(d){return d.started_at}); //in seconds
+        minLastMonth = maxLastMonth - width * 31 
+          jobStartLastMonthBarDimension = ndx.dimension(function(d) {
+          if (d.started_at < minLastMonth) 
+            return minLastMonth - width;
+           return Math.round(d.started_at/width) * width ; 
+        });
         jobStartLastMonthBarGroup = jobStartLastMonthBarDimension.group();
+
+        keys = jobStartLastMonthBarGroup.top(100).map(function(d){return d.key}).sort(
+            function(a,b){
+            if (a<b) 
+              return -1; 
+            if (a>b) 
+              return 1 ; 
+            return 0});
+        dates = keys.map(function(d) {return d3.time.format('%d')(new Date(d*1000))});
+        dates2 = keys.map(function(d,i) {return i});
         jobStartLastMonthBarChart
           .width(400)
           .height(300)
           .dimension(jobStartLastMonthBarDimension)
           .group(jobStartLastMonthBarGroup)
           .elasticY(true)
-          .gap(0)
           .round(dc.round.floor)
           .alwaysUseRounding(true)
           .centerBar(true)
           .filterPrinter(function (filters) {
             console.log("filters");
             var filter = filters[0];
-            s = d3.time.format("%Y-%m-%d")(new Date(1000*filter[0])) + "->" + d3.time.format("%Y-%m-%d")(new Date(1000 * filter[1]))
+            var scale = d3.scale.ordinal().domain(dates2).range(dates);
+            s = scale(filter[0]) + "->" + scale(filter[1]);
             return s;
           })
          .renderHorizontalGridLines(true)
           .xAxisLabel("Time (days)")
           .yAxisLabel("# Jobs")
-          .x(d3.scale.linear().domain([minLastMonth, maxLastMonth]))
-          .xAxis().tickFormat(function (x) {
-              return d3.time.format("%d")(new Date(1000*x))
+          .keyAccessor(function(d) {
+              var a = (d3.scale.ordinal().domain(keys).range(dates2))(d.key);
+              return a;
+          })
+          .x(d3.scale.linear().domain([dates2[1], dates2[dates2.length-1] + 1]))
+            .xAxis().tickFormat(function (x) {
+              return (d3.scale.ordinal().domain(dates2).range(dates))(x)
           })
         .ticks(10);
 
