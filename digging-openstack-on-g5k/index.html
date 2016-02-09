@@ -232,14 +232,8 @@
           .round(dc.round.floor)
           .alwaysUseRounding(true)
           .centerBar(true)
-          .filterPrinter(function (filters) {
-            console.log("filters");
-            var filter = filters[0];
-            var scale = d3.scale.ordinal().domain(dates2).range(dates);
-            s = scale(filter[0]) + "->" + scale(filter[1]);
-            return s;
-          })
-         .renderHorizontalGridLines(true)
+          .brushOn(false)
+          .renderHorizontalGridLines(true)
           .xAxisLabel("Time (days)")
           .yAxisLabel("# Jobs")
           .keyAccessor(function(d) {
