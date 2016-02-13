@@ -1,0 +1,395 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/dc.css">
+    <style>
+      .number-display {
+        font-size: 200%
+      }
+      .dc-chart g.row text {
+        fill: black
+      }
+
+      .chart {
+        border: 1px solid #ccc;
+        margin: 1px;
+      }
+
+      .dc-table-label {
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body style="background-color:#fff">
+
+    <div class="container-fluid" >
+
+      <h1>Openstack jobs on Grid'5000</h1>
+      <div class="row">
+      <p>
+      Note 1 : we present all the jobs that have been submitted with a name 
+      containing openstack or devstack (or some other names known to hide 
+      an openstack deployment). Thus this visualisation is not perfect 
+      and does not show all the openstack deployments on Grid'5000.
+      </p>
+      <p>
+      Note 2 : The power of a node is estimated at 150W.
+      </p>
+      <p>
+      Note 3 : last updated Thu 11 Feb 2016 
+      </p>
+      </div>
+      <div class="row">
+
+        <div class="col-xs-3 col-sm-2">
+          <strong>Deployments per user</strong>
+          <!--          <div id="usersTable"></div> -->
+          <table id="usersTable" class="table-hover dc-data-table chart">
+            <thead>
+              <tr class="header">
+                <th>User</th>
+                <th># Jobs</th>
+                <th>Energy (W.h)</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+
+        <div class="col-xs-4 col-sm-4">
+          <div class = "row">
+            <div id="totalJobs" class="chart">
+              <strong># jobs</strong>
+            </div>
+
+            <div id="totalUsers" class="chart">
+              <strong># users</strong>
+            </div>
+
+            <div id="totalEnergyJobs" class="chart">
+              <strong>Energy (W.h)</strong>
+            </div>
+
+          </div>
+
+          <div id="clustersRow" class="chart">
+            <strong>Main cluster used</strong>
+            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+            <a class="reset" href="javascript:clustersChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+
+            <div class="clearfix"></div>
+          </div>
+
+          <div id="sitesPie" class="chart">
+            <strong>Sites</strong>
+            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+            <a class="reset" href="javascript:sitesChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+
+            <div class="clearfix"></div>
+          </div>
+
+          <div id="jobNamesPie" class="chart">
+            <strong>job names</strong>
+            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+            <a class="reset" href="javascript:jobNamesChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+
+            <div class="clearfix"></div>
+          </div>
+        </div> <!-- col -->
+
+        <div class="col-xs-4 col-sm-4">
+
+          <div id="jobStartBar" class="chart">
+            <strong>OpenStack deployments per week (all times)</strong>
+            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+            <a class="reset" href="javascript:jobStartBarChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+            <div class="clearfix"></div>
+          </div>
+
+          <div id="jobStartLastMonthBar" class="chart">
+            <strong>OpenStack deployments per day (last month)</strong>
+            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+            <a class="reset" href="javascript:jobStartLastMonthBarChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+            <div class="clearfix"></div>
+          </div>
+
+          <div id="nodesRow" class="chart">
+            <strong>Number of nodes used</strong>
+            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+            <a class="reset" href="javascript:nodesChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+
+            <div class="clearfix"></div>
+          </div><!-- nodesRow -->
+          <div id="walltimeBar" class="chart">
+            <strong>Walltime used</strong>
+            <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+            <a class="reset" href="javascript:walltimeBarChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+
+      </div> <!-- row -->
+
+    </div> <!-- container-->
+
+
+
+
+
+    <script type="text/javascript" src="js/d3.min.js"></script>
+    <script type="text/javascript" src="js/crossfilter.js"></script>
+    <script type="text/javascript" src="js/dc.js"></script>
+    <script type="text/javascript" src="js/colorbrewer.js"></script>
+
+    <script type="text/javascript">
+      // pie chart of email domains
+    var allDatas;
+    var sitesChart = dc.pieChart("#sitesPie");
+    var jobStartBarChart = dc.barChart("#jobStartBar");
+    var jobStartLastMonthBarChart = dc.barChart("#jobStartLastMonthBar");
+    var jobNamesChart = dc.pieChart("#jobNamesPie");
+    var clustersChart = dc.rowChart("#clustersRow");
+    var nodesChart = dc.barChart("#nodesRow");
+    var walltimeBarChart = dc.barChart("#walltimeBar");
+    var usersTable = dc.dataTable('#usersTable');
+    var totalJobs = dc.numberDisplay('#totalJobs');
+    var totalUsers = dc.numberDisplay('#totalUsers');
+    var totalEnergyJobs = dc.numberDisplay('#totalEnergyJobs');
+
+    d3.json("openstack.json", function(error, data) {
+        allDatas = data;
+        data = data.filter(function(d){return d.assigned_nodes.length > 0});
+        var ndx = crossfilter(data);
+
+        //sites  chart
+        var sitesDimension = ndx.dimension(function(d) {return d.site;});
+        sitesGroup = sitesDimension.group();
+        sitesChart
+        .width(300)
+        .height(200)
+        .dimension(sitesDimension)
+        .group(sitesGroup)
+        .colors(d3.scale.category10())
+        .legend(dc.legend());
+
+        //jobStart chart
+        // 30 oct 2011
+        min = 1319936400;
+        max = d3.max(data, function(d){return d.started_at});
+        width = 3600*24*7;
+        jobStartBarDimension = ndx.dimension(function(d) {return Math.round(d.started_at/(width)) * width; });
+        jobStartBarGroup = jobStartBarDimension.group();
+        jobStartBarChart
+          .width(400)
+          .height(300)
+          .dimension(jobStartBarDimension)
+          .group(jobStartBarGroup)
+          .elasticY(true)
+          .gap(0)
+          .round(dc.round.floor)
+          .renderHorizontalGridLines(true)
+          .filterPrinter(function (filters) {
+            console.log("filters");
+            var filter = filters[0];
+            s = d3.time.format("%Y-%m-%d")(new Date(1000*filter[0])) + "->" + d3.time.format("%Y-%m-%d")(new Date(1000 * filter[1]))
+            return s;
+          })
+          .xAxisLabel("Time (days)")
+          .yAxisLabel("# Jobs")
+          .x(d3.scale.linear().domain([min, max]))
+          .xAxis().tickFormat(function (x) {
+              return d3.time.format("%Y-%m")(new Date(1000*x))
+              //return x
+              })
+        .ticks(5);
+
+        //jobStart Last month chart
+        // 30 oct 2011
+        width = 3600*24;
+        maxLastMonth = d3.max(data, function(d){return d.started_at}); //in seconds
+        minLastMonth = maxLastMonth - width * 31 
+          jobStartLastMonthBarDimension = ndx.dimension(function(d) {
+          if (d.started_at < minLastMonth) 
+            return minLastMonth - width;
+           return Math.round(d.started_at/width) * width ; 
+        });
+        jobStartLastMonthBarGroup = jobStartLastMonthBarDimension.group();
+
+        keys = jobStartLastMonthBarGroup.top(100).map(function(d){return d.key}).sort(
+            function(a,b){
+            if (a<b) 
+              return -1; 
+            if (a>b) 
+              return 1 ; 
+            return 0});
+        dates = keys.map(function(d) {return d3.time.format('%d')(new Date(d*1000))});
+        dates2 = keys.map(function(d,i) {return i});
+        jobStartLastMonthBarChart
+          .width(400)
+          .height(300)
+          .dimension(jobStartLastMonthBarDimension)
+          .group(jobStartLastMonthBarGroup)
+          .elasticY(true)
+          .round(dc.round.floor)
+          .alwaysUseRounding(true)
+          .centerBar(true)
+          .brushOn(false)
+          .renderHorizontalGridLines(true)
+          .xAxisLabel("Time (days)")
+          .yAxisLabel("# Jobs")
+          .keyAccessor(function(d) {
+              var a = (d3.scale.ordinal().domain(keys).range(dates2))(d.key);
+              return a;
+          })
+          .x(d3.scale.linear().domain([dates2[1], dates2[dates2.length-1] + 1]))
+            .xAxis().tickFormat(function (x) {
+              return (d3.scale.ordinal().domain(dates2).range(dates))(x)
+          })
+        .ticks(10);
+
+        //jobNames  chart
+        var jobNamesDimension = ndx.dimension(function(d) {return d.name;});
+        jobNamesGroup = jobNamesDimension.group();
+        jobNamesChart
+          .width(300)
+          .height(200)
+          .dimension(jobNamesDimension)
+          .group(jobNamesGroup)
+          .colors(d3.scale.category10())
+          .legend(dc.legend())
+          .slicesCap(10)
+
+          // clusters
+          clustersDimension = ndx.dimension(function(d) {
+              if (typeof(d.assigned_nodes[0]) === "undefined") {
+              return "undefined";
+              }
+              return d.assigned_nodes[0].split('.')[0].split('-')[0];
+              });
+
+        clustersGroup = clustersDimension.group();
+        clustersChart
+          .width(300)
+          .height(500)
+          .dimension(clustersDimension)
+          .group(clustersGroup)
+          .elasticX(true)
+          .label(function(d) {return d.key + "/" + d.value})
+          .labelOffsetX(-30)
+          .xAxis().ticks(5);
+
+        // nb nodes
+        min = d3.min(data, function(d) { return d.assigned_nodes.length});
+        max = d3.max(data, function(d) { return d.assigned_nodes.length});
+
+        nodesDimension = ndx.dimension(function(d) {
+            return d.assigned_nodes.length
+            });
+
+
+        nodesGroup = nodesDimension.group();
+        nodesChart
+          .width(400)
+          .height(300)
+          .dimension(nodesDimension)
+          .group(nodesGroup)
+          .elasticY(true)
+          .gap(0)
+          .round(dc.round.floor)
+          .xAxisLabel("# Nodes")
+          .yAxisLabel("# Jobs")
+          .x(d3.scale.linear().domain([min, max]));
+
+        //walltime chart
+        width = 3600;
+        min = 0;
+        max = 24 ;
+        walltimeBarDimension = ndx.dimension(function(d) {var h = d.walltime / width; if (h>max) return max;return Math.round(d.walltime/(width)); });
+        walltimeBarGroup = walltimeBarDimension.group();
+        walltimeBarChart
+          .width(400)
+          .height(300)
+          .dimension(walltimeBarDimension)
+          .group(walltimeBarGroup)
+          .elasticY(true)
+          .gap(0)
+          .round(dc.round.floor)
+          .alwaysUseRounding(true)
+          .centerBar(true)
+          .renderHorizontalGridLines(true)
+          .xAxisLabel("Walltime (hour)")
+          .yAxisLabel("# Jobs")
+          .x(d3.scale.linear().domain([min, max]))
+
+        // by chance we can group datas here ...
+        usersDimension = ndx.dimension(function(d) {return d.user_uid});
+        //usersGroup = usersDimension.group();
+        usersGroup = usersDimension.group().reduce(add, remove, init);
+
+        usersTable /* dc.dataTable('.dc-data-table', 'chartGroup') */
+            .dimension(usersGroup)
+            .group(function(d) {return d})
+            .size(100)
+            .columns([
+                function(d) {return d.key.substring(0,8)},
+                function(d) {return d.value.jobs},
+                function(d) {return Math.round(d.value.energy)}
+                ]
+                )
+            .sortBy(function (d){return d.value.jobs})
+            .order(d3.descending)
+            .on('renderlet', function (table) {
+              table.selectAll('.dc-table-label').style('visibility', 'hidden');
+            });
+
+        totalUserGroup = usersDimension.groupAll().reduce(add, remove, init);
+
+        totalUsers.group(totalUserGroup)
+          .valueAccessor(function(d){return d.users});
+        totalJobs.group(totalUserGroup)
+          .valueAccessor(function(d){return d.jobs});
+        totalEnergyJobs.group(totalUserGroup)
+          .valueAccessor(function(d){return d.energy});
+
+
+        dc.renderAll();
+    });
+
+var init = function(){
+  return {
+    "jobs": 0,
+    "users":0,
+    "energy":0
+  }
+}
+
+  var  add =  function(p,v) {
+    p.jobs ++;
+    if (typeof(p[v.user_uid]) == "undefined" || p[v.user_uid] == 0){
+      p[v.user_uid] = 0
+        p.users ++
+    }
+    p[v.user_uid] ++;
+    p["energy"] += computeEnergy(v);
+    return p;
+  }
+  var remove = function(p,v) {
+    p.jobs --;
+    p[v.user_uid] --;
+    p["energy"] -= computeEnergy(v);
+    if (p[v.user_uid] == 0) {
+      p.users --;
+    }
+    return p;
+  }
+
+function computeEnergy(d) {
+      var energy = d.assigned_nodes.length * (d.stopped_at - d.started_at) * 150 / 3600;
+      if (isNaN(energy)) {
+        // it seems that for atleast 2 records stopped_at is missing
+        return 0;
+      }
+      return energy;
+   }
+  </script>
+</body>
+</html>

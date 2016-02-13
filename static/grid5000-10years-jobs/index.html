@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="js/jquery-1.10.2.js"></script>
+<script src="js/jquery-ui.js"></script>
+<style>
+
+.node {
+  stroke-width: 1.5px;
+}
+
+.tooltip {
+  font-weight: bold !important;
+}
+
+.footer {
+  font-size: xx-small;
+}
+
+.logo{
+  max-width:200px;
+}
+
+.site {
+  
+}
+
+.jobs {
+  font-size: 30px;
+
+}
+
+</style>
+<link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="stylesheets/jquery-ui.css">
+<body>
+  <div class="container">
+  <div class="row">
+    <div class="col-md-9">
+      <div id="graph"></div>
+    </div>
+
+    <div class="col-md-3">
+      <h2>10 years of Grid'5000 jobs</h2>
+      <h4>Speed</h4>
+      <div id="slider"></div>
+      <h4>Layout</h4>
+      <button type="button" class="btn btn-default" onclick="toggle_reorder();">Toggle</button>
+      <div class="logo">
+        <a href="https://www.grid5000.fr"><img width=100% src="images/g5k_logo.jpg"></a>
+      </div>
+      <p>
+        The circles represent the amount of jobs started in one given month for
+        a given site of Grid'5000 testbed.
+        Their sizes are relatives to the maximum total of jobs started in this site.
+      </p>
+      <p>
+        Retired sites (like Orsay, Bordeaux are missing), if you know how to
+        get the datas, I'll be please to add them here :)
+      </p>
+      <p>
+        The process to retrieve the datas is split in three scripts :
+        <ul>
+          <li>Get the start_time of every jobs on each site : <a href="jobs.rb">jobs.rb</a></li>
+          <li>Count the number of jobs per months for each sites: <a href="groups.rb">groups.rb</a></li>
+          <li>Merge in a single dataset the jobs count <a href="merge.rb">merge.rb</a></li>
+        </ul>
+      </p>
+    </div>
+  </div>
+  <div class="footer">
+    Matthieu Simonin - inspired by <a href="http://www.nytimes.com/interactive/2012/02/13/us/politics/2013-budget-proposal-graphic.html?_r=0">Four Ways to Slice Obama’s 2013 Budget Proposal</a>
+    and <a href="http://bl.ocks.org/mbostock/1021953">Multi-Foci Force Layout</a> - using <a href="http://d3js.org/">d3.js</a>
+  </div>
+</div>
+
+
+<script src="js/underscore-min.js"></script>
+<script src="js/d3.min.js"></script>
+
+<script>
+console.log("hello");
+var sites = [];
+var nodes = [];
+var reorder = false;
+var width = 800,
+    height = 1000,
+    speed = 1100;
+
+    $(function() {
+       $( "#slider" ).slider({
+         value:1100,
+         min:0,
+         max:2000,
+         step:100,
+         slide: function(e,ui) {
+           speed = 2100-ui.value;
+         }
+       });
+     });
+
+     // info div to display on mouse over.
+     var tooltip = d3.select("body")
+     	.append("div")
+     	.attr("class", "tooltip")
+     	.style("opacity", 0);
+
+  d3.json("monthly_jobs.json", function(data){
+    allNodes = data.sort(function(a,b) {
+      // sort by date
+      if (a.month < b.month) {
+        return -1;
+      }
+      if (a.month > b.month) {
+        return 1;
+      }
+      return 0;
+    });
+
+    sites = _.uniq(_.pluck(allNodes, "site"));
+    months= _.uniq(_.pluck(allNodes, "month"));
+    maxJobs = {};
+    sites.forEach(function(s,i) {
+      maxJobs[s] = 0;
+    });
+    // initialisations
+    allNodes.forEach(function(d,i){
+      d.x = width/2;
+      d.y = height/2;
+      maxJobs[d.site] = d.jobs>maxJobs[d.site]?d.jobs:maxJobs[d.site];
+    });
+
+
+
+
+    // get all the sites
+
+    //nodes = allNodes.slice(0,100);
+    scale = d3.scale
+          .ordinal()
+          .domain(sites)
+          .range(_.range(sites.length));
+
+    var fill = d3.scale
+          .category20();
+
+    foci = sites.map(function(s) {
+        return {
+          x: Math.cos(scale(s) / sites.length * 2 * Math.PI) * 150 + width / 2 + Math.random(),
+          y: Math.sin(scale(s) / sites.length * 2 * Math.PI) * 150 + height / 2 + Math.random()
+        }
+      });
+
+    foci_names = sites.map(function(s) {
+        return {
+          x: Math.cos(scale(s) / sites.length * 2 * Math.PI) * 300 + width / 2 + Math.random(),
+          y: Math.sin(scale(s) / sites.length * 2 * Math.PI) * 300 + height / 2 + Math.random()
+        }
+      });
+
+    var svg = d3.select("#graph").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(0,50)")
+        ;
+
+
+      // jobs counter
+      var counter = {jobs: 0, date:""};
+      var tjobs = svg.selectAll("jobs")
+      .data([counter]);
+
+      // display counters
+      var counterGroup = tjobs.enter()
+        .append("g")
+        .attr("transform", "translate(" + (width/2-50) + "," + height/2 + ")");
+
+      var jobs = counterGroup
+        .append("text")
+        .attr("class", "jobs")
+        .style("font-size", 30)
+
+      var date = counterGroup
+          .append("text")
+          .attr("y", -30)
+          .attr("class", "date")
+
+    force = d3.layout.force()
+        .nodes(nodes)
+        .links([])
+        .gravity(0)
+        .charge(-4)
+        .size([width, height])
+        .on("tick", tick);
+      force.start();
+
+      node = svg.append("g").selectAll("circle");
+
+      // sites labels
+      site = svg.append("g").selectAll("site");
+      site = site.data(sites);
+
+      site.enter()
+        .append("text")
+        .attr("class", "site")
+        .attr("x", function(d) {return foci_names[scale(d)].x })
+        .attr("y", function(d) {return foci_names[scale(d)].y })
+        .text(function(d) {return d})
+        .style("font-size", 16);
+
+      function tick(e) {
+        var k = .1 * e.alpha;
+
+        // Push nodes toward their designated focus.
+        nodes.forEach(function(o, i) {
+          o.y += (foci[scale(o.site)].y - o.y) * k;
+          o.x += (foci[scale(o.site)].x - o.x) * k;
+        });
+
+        node
+            .attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; });
+      }
+
+     var offset = 0;
+     var current  = allNodes[offset].month;
+
+     var iterate = function(){
+       if (offset >= allNodes.length) {
+         return;
+       }
+       c = current
+       o = offset;
+       while (current == c && o < allNodes.length) {
+         c = allNodes[o].month;
+         o = o + 1 ;
+       }
+
+       var newNodes = allNodes.slice(offset, o-1);
+       newNodes.forEach(function(d,i) {
+         counter.jobs +=  d.jobs;
+         counter.date = current;
+       });
+       var event = new CustomEvent('newmonth',
+       {
+         "detail": {
+           "counter" : counter,
+           "nodes" : newNodes
+         }
+       });
+       offset = o-1;
+       current = c;
+       document.body.dispatchEvent(event);
+
+       // iterate
+       setTimeout(iterate, speed);
+     }
+
+     function displayTooltip(d) {
+       tooltip
+       .style("left", (d3.event.pageX) + "px")
+       .style("top", (d3.event.pageY - 28) + "px")
+       .style("opacity", 1)
+       .html(d.site + ":" + d.jobs + " jobs on " + d.month)
+       d3.select(this)
+        .style("stroke", "red");
+     }
+
+     function removeTooltip(d) {
+       tooltip
+        .style("opactity", 0)
+        .html("")
+        d3.select(this)
+         .style("stroke", function(d) { return d3.rgb(fill(d.site)).darker(2)});
+     }
+     xScale = d3.scale
+           .ordinal()
+           .domain(months)
+           .range(_.range(48).map(function(m){return m*(width-100)/48}));
+
+     yScale = function(month) {
+       var index = months.indexOf(month);
+       return Math.floor(index / 48);
+     }
+
+     function redraw() {
+       node = node.data(nodes);
+       if (!reorder) {
+
+         site.transition().duration(speed)
+           .attr("x", function(d) {return foci_names[scale(d)].x})
+           .attr("y", function(d) {return foci_names[scale(d)].y})
+           .style("font-size", 16);
+
+         force.start();
+
+         node.enter().append("circle")
+             .attr("class", "node")
+             .attr("cx", function(d) { return d.x; })
+             .attr("cy", function(d) { return d.y; })
+
+             .style("fill", function(d) { return fill(d.site); })
+             .style("stroke", function(d) { return d3.rgb(fill(d.site)).darker(2); })
+             .style("opacity", 0.7)
+             .attr("r", 0)
+             .on("mouseover", displayTooltip)
+             .on("mouseout", removeTooltip)
+             .transition()
+             .duration(0.5*speed)
+             .attr("r", function(d){
+               return 20* Math.sqrt(d.jobs / maxJobs[d.site]);
+             })
+
+
+       } else {
+         force.stop();
+
+         site.transition().duration(speed)
+           .attr("x", function(d) {return 0 })
+           .attr("y", function(d) {return scale(d)*25})
+           .style('font-size', 12);
+
+
+
+         // move existing to axis display
+         node.transition().duration(speed)
+         .attr("cx", function(d,i) {
+            var x = 50 + xScale(d.month);
+            // reinit the force layout position
+            d.x = x
+            return x;
+
+         })
+         .attr("cy", function(d,i) {
+           var y = (sites.length + 1) * 25  * yScale(d.month) + 25 * scale(d.site);
+           // reinit the force layout position
+           d.y = y
+           return y
+         })
+
+         node.enter().append("circle")
+             .attr("class", "node")
+             .attr("cx", function(d){return d.x})
+             .attr("cy", function(d){return d.y})
+             .style("fill", function(d) { return fill(d.site); })
+             .style("stroke", function(d) { return d3.rgb(fill(d.site)).darker(2); })
+             .style("opacity", 0.7)
+             .on("mouseover", displayTooltip)
+             .on("mouseout", removeTooltip)
+             .transition().duration(speed)
+             .attr("cx", function(d) { return 50 + xScale(d.month); })
+             .attr("cy", function(d,i) {
+               return (sites.length + 1) * 25 * yScale(d.month) + 25 * scale(d.site)
+             })
+             .attr("r", function(d){
+               return 20* Math.sqrt(d.jobs / maxJobs[d.site]);
+             })
+
+       }
+     }
+
+     //update the vis
+     document.body.addEventListener("newmonth", function(e){
+       e.detail.nodes.forEach(function(d,i) {
+         nodes.push(d);
+       });
+       redraw();
+     }, false);
+
+     //update the counters
+     document.body.addEventListener("newmonth", function(e){
+        jobs.text(e.detail.counter.jobs + " jobs");
+        date.text(e.detail.counter.date);
+     }, false);
+
+     // redraw
+     document.body.addEventListener("redraw", function(e){
+        redraw();
+     }, false);
+
+     // start the vis
+     iterate();
+
+
+  });
+
+function toggle_reorder() {
+  reorder = ! reorder;
+};
+
+</script>
