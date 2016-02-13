@@ -2,7 +2,7 @@
 layout: post
 title:  "My experimentation notebook (on Grid'5000)"
 date: 2016-01-07 10:30:00
-categories: jekyll update 
+categories: grid5000 notebook ruby
 ---
 
 This articles shows a simple use of [iruby
