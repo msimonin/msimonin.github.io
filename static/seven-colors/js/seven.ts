@@ -353,29 +353,6 @@ class Drawer {
 // global colors mapping ...
  var color = d3.scale.category10();
 
-
-function draw_match() {
-  var DIMENSION: number = 50;
-  var SPEED: number = 100;
-  var SIZE: number = 500;
-  var COLORS: number = 7;
-  var ruleGame : Game = new Game(DIMENSION, COLORS);
-  var ai1: AI = new BasicAI(ruleGame, [ruleGame.world[0]], "red");
-  var ai2: AI = new GreedyMaxCellsAI(ruleGame, [ruleGame.world[DIMENSION * DIMENSION - 1]], "blue");
-  var drawer: Drawer = new Drawer(ruleGame, SPEED, "#match", SIZE);
-
-  iterate();
-  function iterate(){
-    var one1 = ai1.oneStep();
-    var one2 = ai2.oneStep();
-    drawer.update();
-    if (one1 || one2) {
-      setTimeout(iterate, SPEED);
-    }
-
-  }
-}
-
 class ExampleGame {
   colors: number;
   dimension: number;
@@ -439,11 +416,19 @@ class VersusGame {
   ai2: AI;
   drawer: Drawer;
   selection: string;
+  displayStats: any;
+  statsSelection: string;
+  displayScore: any;
+  scoreSelection: string;
+  ai1Score: number;
+  ai2Score: number;
 
   constructor(
     ai1: string,
     ai2: string,
     selection: string,
+    statsSelection: string,
+    scoreSelection: string,
     colors = 4,
     dimension = 4,
     size = 150,
@@ -456,13 +441,39 @@ class VersusGame {
     this.selection = selection;
     this.ai1string = ai1;
     this.ai2string = ai2;
+    this.statsSelection = statsSelection;
+    this.ai1Score = 0;
+    this.ai2Score = 0;
+    this.scoreSelection = scoreSelection;
   }
 
   start(){
     this.game = new Game(this.dimension, this.colors);
+    this.displayStats = d3.select(this.statsSelection);
+    this.displayScore = d3.select(this.scoreSelection);
     this.ai1 = this.buildAI(this.ai1string, 0, "red");
     this.ai2 = this.buildAI(this.ai2string, this.dimension*this.dimension - 1, "blue");
     this.drawer = new Drawer(this.game, this.speed, this.selection, this.size);
+
+    if (this.ai1string === "human") {
+      this.drawer.svgDatas.on("click", (d) => {
+        // check if d is in the candidates
+        if (this.ai1.extend(d)){
+          // ai step
+          this.ai2.oneStep();
+          this.drawer.update();
+          var stats = this.currentStats();
+          var color = "red";
+          if (stats.ai1 >= stats.ai2) {
+            color = "red"
+          } else {
+            color = "blue"
+          }
+          this.displayStats.style("background-color", color)
+        };
+
+      });
+    }
     this.drawer.update();
   }
 
@@ -473,6 +484,8 @@ class VersusGame {
       return new GreedyMaxCellsAI(this.game, [this.game.world[start]], color);
     } else if (aistring == "greedyMaxGroups") {
       return new GreedyMaxGroupAI(this.game, [this.game.world[start]], color);
+    } else if (aistring == "human") {
+        return new HumanAI(this.game, [this.game.world[start]], color);
     }
   }
 
@@ -486,89 +499,45 @@ class VersusGame {
   launch() {
     if (this.oneStep()) {
       setTimeout(() => {this.launch()}, this.speed);
-    }
-  }
-}
-
-class HumanGame {
-  colors: number;
-  dimension: number;
-  size: number;
-  game: Game;
-  ai1string: string;
-  ai1: AI;
-  drawer: Drawer;
-  selection: string;
-  speed: number;
-  human : AI;
-  displayStats: any;
-  statsSelection: string;
-
-  constructor(
-    ai1: string,
-    selection: string,
-    statsSelection: string,
-    colors = 7,
-    dimension = 20,
-    size = 500
-  ) {
-    this.colors = colors;
-    this.dimension = dimension;
-    this.size = size;
-    this.selection = selection;
-    this.ai1string = ai1;
-    this.speed = 100;
-    this.statsSelection = statsSelection;
-
-  }
-
-  start(){
-    this.displayStats = d3.select(this.statsSelection);
-    this.game = new Game(this.dimension, this.colors);
-    this.ai1 = this.buildAI(this.ai1string, this.dimension * this.dimension - 1, "blue");
-    this.human = this.buildAI("human", 0, "red");
-    this.game.world[0].owner = "red";
-    this.drawer = new Drawer(this.game, this.speed, this.selection, this.size);
-    this.drawer.update();
-    this.drawer.svgDatas.on("click", (d) => {
-      // check if d is in the candidates
-      if (this.human.extend(d)){
-        // ai step
-        this.ai1.oneStep();
-        this.drawer.update();
-        var stats = this.stats();
-        var color = "red";
-        if (stats.human >= stats.ai) {
-          color = "red"
-        } else {
-          color = "blue"
-        }
-        this.displayStats.style("background-color", color)
-      };
-
-    });
-  }
-
-  buildAI(aistring: string, start: number, color: string){
-    if (aistring == "basic") {
-      return new BasicAI(this.game, [this.game.world[start]], color);
-    } else if (aistring == "greedyMaxCells") {
-      return new GreedyMaxCellsAI(this.game, [this.game.world[start]], color);
-    } else if (aistring == "greedyMaxGroups") {
-      return new GreedyMaxGroupAI(this.game, [this.game.world[start]], color);
-    } else if (aistring == "human") {
-      return new HumanAI(this.game, [this.game.world[start]], color);
+    } else {
+      this.updateScore();
     }
   }
 
-  stats() {
+  updateScore() {
+    if (this.ai1.zone.length < this.ai2.zone.length) {
+      this.ai2Score ++;
+    } else if (this.ai1.zone.length > this.ai2.zone.length) {
+      this.ai1Score ++;
+    }
+
+    this.displayScore.html(
+    `<span class="${this.ai1.color}">${this.ai1Score}</span>
+    /
+    <span class="${this.ai2.color}">${this.ai2Score}</span>`);
+
+
+  }
+
+  launchFast(){
+    while(this.oneStep()){
+    }
+    this.updateScore();
+  }
+
+  currentStats() {
     return {
-      human: this.human.zone.length,
-      ai: this.ai1.zone.length
+      ai1: this.ai1.zone.length,
+      ai2: this.ai2.zone.length
     }
   }
 
+  globalStats(){
+
+  }
+
 }
+
 
 var ruleGame = new ExampleGame(
   "basic",
@@ -594,13 +563,17 @@ var stratGreedyMaxGroupsGame = new ExampleGame(
 var gameIllustration = new VersusGame(
   "basic",
   "basic",
-  "#game-illustration"
+  "#game-illustration",
+  "#stats-game-illustration",
+  "#score-game-illustration"
 )
 
 var matchRandomGreedyCells = new VersusGame(
   "basic",
   "greedyMaxCells",
   "#match-random-vs-greedy-cells",
+  "#stats-match-random-vs-greedy-cells",
+  "#score-match-random-vs-greedy-cells",
   7,
   50,
   300,
@@ -611,14 +584,21 @@ var matchRandomGreedyGroups = new VersusGame(
   "greedyMaxCells",
   "greedyMaxGroups",
   "#match-random-vs-greedy-groups",
+  "#stats-match-random-vs-greedy-groups",
+  "#score-match-random-vs-greedy-groups",
   7,
   50,
   300,
   50
 )
 
-var matchHumanGreedyCells = new HumanGame(
+var matchHumanGreedyCells = new VersusGame(
+  "human",
   "greedyMaxCells",
   "#match-human-vs-greedy-cells",
-  "#stats-match-human-vs-greedy-cells"
+  "#stats-match-human-vs-greedy-cells",
+  "#score-match-human-vs-greedy-cells",
+  7,
+  20,
+  500
 )

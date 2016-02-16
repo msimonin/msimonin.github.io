@@ -117,27 +117,33 @@
       strategy is probably made of different ones. But let's do something simple : comparing the above strategies.
 
       <div class="col-md-6 col-xs-6">
-        <h5><span class="red">Random</span> VS <span class="blue">Greedy max cells</span></h5>
-        <div id="match-random-vs-greedy-cells">
-        </div>
+        <h4>
+          <span class="red">Random</span> VS <span class="blue">Greedy max cells</span>
+          [<span id="score-match-random-vs-greedy-cells"></span>]
+        </h4>
+        <div id="match-random-vs-greedy-cells"></div>
         <script>
         matchRandomGreedyCells.start();
         </script>
         <div>
-          <a href="#"onclick="matchRandomGreedyCells.start();return false;">restart</a> /
-          <a href="#"onclick="matchRandomGreedyCells.launch();return false;">launch</a>
+          <a href="#"onclick="matchRandomGreedyCells.start();return false;">restart</a> -
+          <a href="#"onclick="matchRandomGreedyCells.launch();return false;">launch</a> /
+          <a href="#"onclick="matchRandomGreedyCells.start(); matchRandomGreedyCells.launchFast();return false;">launch fast</a>
         </div>
       </div>
       <div class="col-md-6 col-xs-6">
-        <h5><span class="red">Greedy max cells </span> VS <span class="blue">Greedy max groups</span></h5>
+        <h4><span class="red">Greedy max cells </span> VS <span class="blue">Greedy max groups</span>
+        [<span id="score-match-random-vs-greedy-groups"></span>]
+        </h4>
         <div id="match-random-vs-greedy-groups">
         </div>
         <script>
         matchRandomGreedyGroups.start();
         </script>
         <div>
-          <a href="#"onclick="matchRandomGreedyGroups.start();return false;">restart</a> /
-          <a href="#"onclick="matchRandomGreedyGroups.launch();return false;">launch</a>
+          <a href="#"onclick="matchRandomGreedyGroups.start();return false;">restart</a> -
+          <a href="#"onclick="matchRandomGreedyGroups.launch();return false;">launch</a> /
+          <a href="#"onclick="matchRandomGreedyGroups.start(); matchRandomGreedyGroups.launchFast();return false;">launch fast</a>
         </div>
       </div>
     </div>
@@ -148,6 +154,7 @@
 
       <div class="text-center">
       <span id="stats-match-human-vs-greedy-cells" class="winner">WINNER</span>
+      [<span id="score-match-human-vs-greedy-cells"></span>]
       <div id="match-human-vs-greedy-cells"></div>
     </div>
       <script>

@@ -297,25 +297,6 @@ var Drawer = (function () {
 })();
 // global colors mapping ...
 var color = d3.scale.category10();
-function draw_match() {
-    var DIMENSION = 50;
-    var SPEED = 100;
-    var SIZE = 500;
-    var COLORS = 7;
-    var ruleGame = new Game(DIMENSION, COLORS);
-    var ai1 = new BasicAI(ruleGame, [ruleGame.world[0]], "red");
-    var ai2 = new GreedyMaxCellsAI(ruleGame, [ruleGame.world[DIMENSION * DIMENSION - 1]], "blue");
-    var drawer = new Drawer(ruleGame, SPEED, "#match", SIZE);
-    iterate();
-    function iterate() {
-        var one1 = ai1.oneStep();
-        var one2 = ai2.oneStep();
-        drawer.update();
-        if (one1 || one2) {
-            setTimeout(iterate, SPEED);
-        }
-    }
-}
 var ExampleGame = (function () {
     function ExampleGame(ai, selection, colors, dimension, size, speed) {
         if (colors === void 0) { colors = 4; }
@@ -353,7 +334,7 @@ var ExampleGame = (function () {
     return ExampleGame;
 })();
 var VersusGame = (function () {
-    function VersusGame(ai1, ai2, selection, colors, dimension, size, speed) {
+    function VersusGame(ai1, ai2, selection, statsSelection, scoreSelection, colors, dimension, size, speed) {
         if (colors === void 0) { colors = 4; }
         if (dimension === void 0) { dimension = 4; }
         if (size === void 0) { size = 150; }
@@ -365,81 +346,42 @@ var VersusGame = (function () {
         this.selection = selection;
         this.ai1string = ai1;
         this.ai2string = ai2;
+        this.statsSelection = statsSelection;
+        this.ai1Score = 0;
+        this.ai2Score = 0;
+        this.scoreSelection = scoreSelection;
     }
     VersusGame.prototype.start = function () {
+        var _this = this;
         this.game = new Game(this.dimension, this.colors);
+        this.displayStats = d3.select(this.statsSelection);
+        this.displayScore = d3.select(this.scoreSelection);
         this.ai1 = this.buildAI(this.ai1string, 0, "red");
         this.ai2 = this.buildAI(this.ai2string, this.dimension * this.dimension - 1, "blue");
         this.drawer = new Drawer(this.game, this.speed, this.selection, this.size);
+        if (this.ai1string === "human") {
+            this.drawer.svgDatas.on("click", function (d) {
+                // check if d is in the candidates
+                if (_this.ai1.extend(d)) {
+                    // ai step
+                    _this.ai2.oneStep();
+                    _this.drawer.update();
+                    var stats = _this.currentStats();
+                    var color = "red";
+                    if (stats.ai1 >= stats.ai2) {
+                        color = "red";
+                    }
+                    else {
+                        color = "blue";
+                    }
+                    _this.displayStats.style("background-color", color);
+                }
+                ;
+            });
+        }
         this.drawer.update();
     };
     VersusGame.prototype.buildAI = function (aistring, start, color) {
-        if (aistring == "basic") {
-            return new BasicAI(this.game, [this.game.world[start]], color);
-        }
-        else if (aistring == "greedyMaxCells") {
-            return new GreedyMaxCellsAI(this.game, [this.game.world[start]], color);
-        }
-        else if (aistring == "greedyMaxGroups") {
-            return new GreedyMaxGroupAI(this.game, [this.game.world[start]], color);
-        }
-    };
-    VersusGame.prototype.oneStep = function () {
-        var one = this.ai1.oneStep();
-        var two = this.ai2.oneStep();
-        this.drawer.update();
-        return one || two;
-    };
-    VersusGame.prototype.launch = function () {
-        var _this = this;
-        if (this.oneStep()) {
-            setTimeout(function () { _this.launch(); }, this.speed);
-        }
-    };
-    return VersusGame;
-})();
-var HumanGame = (function () {
-    function HumanGame(ai1, selection, statsSelection, colors, dimension, size) {
-        if (colors === void 0) { colors = 7; }
-        if (dimension === void 0) { dimension = 20; }
-        if (size === void 0) { size = 500; }
-        this.colors = colors;
-        this.dimension = dimension;
-        this.size = size;
-        this.selection = selection;
-        this.ai1string = ai1;
-        this.speed = 100;
-        this.statsSelection = statsSelection;
-    }
-    HumanGame.prototype.start = function () {
-        var _this = this;
-        this.displayStats = d3.select(this.statsSelection);
-        this.game = new Game(this.dimension, this.colors);
-        this.ai1 = this.buildAI(this.ai1string, this.dimension * this.dimension - 1, "blue");
-        this.human = this.buildAI("human", 0, "red");
-        this.game.world[0].owner = "red";
-        this.drawer = new Drawer(this.game, this.speed, this.selection, this.size);
-        this.drawer.update();
-        this.drawer.svgDatas.on("click", function (d) {
-            // check if d is in the candidates
-            if (_this.human.extend(d)) {
-                // ai step
-                _this.ai1.oneStep();
-                _this.drawer.update();
-                var stats = _this.stats();
-                var color = "red";
-                if (stats.human >= stats.ai) {
-                    color = "red";
-                }
-                else {
-                    color = "blue";
-                }
-                _this.displayStats.style("background-color", color);
-            }
-            ;
-        });
-    };
-    HumanGame.prototype.buildAI = function (aistring, start, color) {
         if (aistring == "basic") {
             return new BasicAI(this.game, [this.game.world[start]], color);
         }
@@ -453,19 +395,50 @@ var HumanGame = (function () {
             return new HumanAI(this.game, [this.game.world[start]], color);
         }
     };
-    HumanGame.prototype.stats = function () {
+    VersusGame.prototype.oneStep = function () {
+        var one = this.ai1.oneStep();
+        var two = this.ai2.oneStep();
+        this.drawer.update();
+        return one || two;
+    };
+    VersusGame.prototype.launch = function () {
+        var _this = this;
+        if (this.oneStep()) {
+            setTimeout(function () { _this.launch(); }, this.speed);
+        }
+        else {
+            this.updateScore();
+        }
+    };
+    VersusGame.prototype.updateScore = function () {
+        if (this.ai1.zone.length < this.ai2.zone.length) {
+            this.ai2Score++;
+        }
+        else if (this.ai1.zone.length > this.ai2.zone.length) {
+            this.ai1Score++;
+        }
+        this.displayScore.html("<span class=\"" + this.ai1.color + "\">" + this.ai1Score + "</span>\n    /\n    <span class=\"" + this.ai2.color + "\">" + this.ai2Score + "</span>");
+    };
+    VersusGame.prototype.launchFast = function () {
+        while (this.oneStep()) {
+        }
+        this.updateScore();
+    };
+    VersusGame.prototype.currentStats = function () {
         return {
-            human: this.human.zone.length,
-            ai: this.ai1.zone.length
+            ai1: this.ai1.zone.length,
+            ai2: this.ai2.zone.length
         };
     };
-    return HumanGame;
+    VersusGame.prototype.globalStats = function () {
+    };
+    return VersusGame;
 })();
 var ruleGame = new ExampleGame("basic", "#rules");
 var stratRandomGame = new ExampleGame("basic", "#strat-random");
 var stratGreedyMaxCellsGame = new ExampleGame("greedyMaxCells", "#strat-greedy-max-cells");
 var stratGreedyMaxGroupsGame = new ExampleGame("greedyMaxGroups", "#strat-greedy-max-groups", 5);
-var gameIllustration = new VersusGame("basic", "basic", "#game-illustration");
-var matchRandomGreedyCells = new VersusGame("basic", "greedyMaxCells", "#match-random-vs-greedy-cells", 7, 50, 300, 50);
-var matchRandomGreedyGroups = new VersusGame("greedyMaxCells", "greedyMaxGroups", "#match-random-vs-greedy-groups", 7, 50, 300, 50);
-var matchHumanGreedyCells = new HumanGame("greedyMaxCells", "#match-human-vs-greedy-cells", "#stats-match-human-vs-greedy-cells");
+var gameIllustration = new VersusGame("basic", "basic", "#game-illustration", "#stats-game-illustration", "#score-game-illustration");
+var matchRandomGreedyCells = new VersusGame("basic", "greedyMaxCells", "#match-random-vs-greedy-cells", "#stats-match-random-vs-greedy-cells", "#score-match-random-vs-greedy-cells", 7, 50, 300, 50);
+var matchRandomGreedyGroups = new VersusGame("greedyMaxCells", "greedyMaxGroups", "#match-random-vs-greedy-groups", "#stats-match-random-vs-greedy-groups", "#score-match-random-vs-greedy-groups", 7, 50, 300, 50);
+var matchHumanGreedyCells = new VersusGame("human", "greedyMaxCells", "#match-human-vs-greedy-cells", "#stats-match-human-vs-greedy-cells", "#score-match-human-vs-greedy-cells", 7, 20, 500);
