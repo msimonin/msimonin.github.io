@@ -22,8 +22,11 @@ interface AI {
   zone: Cell[];
   color: string;
 
+  // one step of the strategy
   oneStep () : boolean
 
+  // force extension with d (d must be in the candidates)
+  extend(d): boolean
 }
 
 class BasicAI implements AI {
@@ -59,17 +62,48 @@ class BasicAI implements AI {
       return false;
     }
     // pick one group (the first one)
-    var choices = candidates[keys[0]];
-    for (var c in choices) {
-      var choice = choices[c];
-      choice.owner = this.color;
-      //choice.value = -1;
-      // extend the zone;
-      this.zone.push(choice);
+    var randomIndex = Math.floor(Math.random()*keys.length);
+    var groups = candidates[keys[randomIndex]];
+
+    for (var g in groups) {
+      var group = groups[g];
+      for (var c in groups[g]) {
+        var choice = group[c];
+        choice.owner = this.color;
+        //choice.value = -1;
+        // extend the zone;
+        this.zone.push(choice);
+      }
     }
     return true;
   }
 
+  extend(d) {
+    var found = false;
+    var candidates = this.getCandidates();
+    for (var k in candidates) {
+      var groups = candidates[k];
+      // check if d is in one group
+      found = groups.some(function(group){
+        return group.some(function(cell) {
+          return cell.x === d.x && cell.y === d.y;
+        });
+      });
+      if (found) {
+        // we can extend with value k
+        for (var g in groups) {
+          var group = groups[g];
+          for (var c in group) {
+            var choice = group[c];
+            choice.owner = this.color;
+            this.zone.push(choice);
+          }
+        }
+        break
+      }
+    }
+    return found;
+  }
   /*
   *
   */
@@ -77,27 +111,37 @@ class BasicAI implements AI {
     var candidates = {}
     for (var i in this.zone) {
       var cell = this.zone[i];
-      var frees = game.freeNeighbours(cell);
+      var frees = this.game.freeNeighbours(cell);
       for (var f in frees){
         var free = frees[f]
         candidates[free.value] = candidates[free.value] || [];
-        // add it if not already here
-        for (var c in free.connex) {
-          var conn = free.connex[c];
-          if (!candidates[free.value].some(function(d){return d.x === conn.x && d.y === conn.y})) {
-            candidates[free.value].push(conn);
-            if (conn.x === 0 && conn.y === 0) {
-              console.log("pushinh origin");
-            }
-          }
+        // we add free.connex if it isn't already in
+        // as we are dealing with connex part we only check for the first element.
+        var first = free.connex[0];
+        var alreadyAdded = candidates[free.value].some(function(c){
+          return c.some(function(cc) {
+            return cc.x === first.x && cc.y === first.y
+          });
+        });
+        if (!alreadyAdded) {
+          candidates[free.value].push(free.connex);
         }
+
       }
     }
     return candidates;
   }
+
+
 }
 
-class GreedyAI extends BasicAI {
+class HumanAI extends BasicAI {
+  oneStep() {
+    return false;
+  }
+}
+
+class GreedyMaxGroupAI extends BasicAI {
   constructor(game: Game, zone: Cell[], color: string) {
     super(game, zone, color);
   }
@@ -110,16 +154,59 @@ class GreedyAI extends BasicAI {
     if (keys.length == 0) {
       return false;
     }
+
     var values = keys
       .map(function(k,i) {return candidates[k]})
 
-    // we pick the groups which have the most cells
-    var choices = _.max(values, function(v){return v.length});
-    for (var c in choices) {
-      var choice = choices[c];
+    // we pick the groups which have the most connex part
+    var groups = _.max(values, function(v){return v.length});
+
+    for (var g in groups) {
+      var group = groups[g];
+      for (var c in group) {
+        var choice = group[c];
+        choice.owner = this.color;
+        this.zone.push(choice);
+      }
+    }
+    return true;
+  }
+}
+
+class GreedyMaxCellsAI extends BasicAI {
+  constructor(game: Game, zone: Cell[], color: string) {
+    super(game, zone, color);
+  }
+
+  // the AI plays
+  oneStep() : boolean {
+    // old the closest possible neighbours of the controlled zone
+
+    var candidates = this.getCandidates();
+    var keys = Object.keys(candidates);
+    if (keys.length == 0) {
+      return false;
+    }
+
+    var values = keys
+      .map(function(k,i) {return candidates[k]})
+
+    // we pick the groups which have the most connex part
+    var groups = values.map(
+      function(g) {
+        return g.reduce(function(p,c){
+          for (var cc in c){
+            p.push(c[cc])
+          }
+          return p;
+        }, []);
+      }
+    )
+
+    var group = _.max(groups, function(d){return d.length});
+    for (var g in group) {
+      var choice = group[g];
       choice.owner = this.color;
-      //choice.value = -1;
-      // extend the zone;
       this.zone.push(choice);
     }
     return true;
@@ -130,7 +217,6 @@ class Game {
   dimension: number;
   colors: number;
   world: Cell[];
-  size: number;
   // all connex parts of the game
   zones: Cell[][];
 
@@ -138,7 +224,6 @@ class Game {
     this.dimension = dimension;
     this.colors = colors;
     this.world = [];
-    this.size = 500;
 
     for (var i=0; i<dimension; i++) {
       for (var j=0; j<dimension; j++) {
@@ -218,27 +303,32 @@ class Drawer {
   game: Game;
   svgDatas: any;
   speed: number;
+  size: number;
 
-  constructor(game: Game, speed: number) {
+  constructor(game: Game, speed: number, selection: string, size: number) {
     this.game = game;
     this.speed = speed;
+    this.size = size;
 
-    var svg = d3.select("#graph")
-      .append("svg")
-      .attr("width", game.size)
-      .attr("height", game.size);
+    var div = d3.select(selection);
+    div.select("svg").remove();
+
+    var svg = div.append("svg")
+      .attr("width", this.size)
+      .attr("height", this.size);
 
     var scale = d3.scale.linear()
           .domain([0, game.dimension])
-          .range([0, game.size]);
+          .range([0, this.size]);
 
     this.svgDatas = svg.selectAll("rect").data(game.world, function(d){return `${d.x}-${d.y}`});
     this.svgDatas.enter()
       .append("rect")
       .attr("x", function(d){return scale(d.x)})
       .attr("y", function(d){return scale(d.y)})
-      .attr("width", game.size/game.dimension)
-      .attr("height", game.size/game.dimension);
+      .attr("width", this.size/game.dimension)
+      .attr("height", this.size/game.dimension);
+
     this.update();
   }
 
@@ -258,26 +348,277 @@ class Drawer {
       return 0.6;
     });
   }
-
-
-
 }
-// global colors mapping ...
-var color = d3.scale.category10();
-var SPEED = 1000;
-var SIZE: number = 10  ;
-var game: Game = new Game(SIZE, 4);
-var ai1: AI = new GreedyAI(game, [game.world[0]], "red");
-var ai2: AI = new BasicAI(game, [game.world[SIZE * SIZE - 1 ]], "blue");
-var drawer: Drawer = new Drawer(game, SPEED);
-drawer.update();
 
-step();
-function step() {
-  var one1 = ai1.oneStep();
-  var one2 = ai2.oneStep();
-  drawer.update();
-  if (one1 || one2) {
-    setTimeout(step, SPEED);
+// global colors mapping ...
+ var color = d3.scale.category10();
+
+
+function draw_match() {
+  var DIMENSION: number = 50;
+  var SPEED: number = 100;
+  var SIZE: number = 500;
+  var COLORS: number = 7;
+  var ruleGame : Game = new Game(DIMENSION, COLORS);
+  var ai1: AI = new BasicAI(ruleGame, [ruleGame.world[0]], "red");
+  var ai2: AI = new GreedyMaxCellsAI(ruleGame, [ruleGame.world[DIMENSION * DIMENSION - 1]], "blue");
+  var drawer: Drawer = new Drawer(ruleGame, SPEED, "#match", SIZE);
+
+  iterate();
+  function iterate(){
+    var one1 = ai1.oneStep();
+    var one2 = ai2.oneStep();
+    drawer.update();
+    if (one1 || one2) {
+      setTimeout(iterate, SPEED);
+    }
+
   }
 }
+
+class ExampleGame {
+  colors: number;
+  dimension: number;
+  size: number;
+  speed: number;
+  game: Game;
+  aistring: string;
+  ai: AI;
+  drawer: Drawer;
+  selection: string;
+
+  constructor(
+    ai: string,
+    selection: string,
+    colors = 4,
+    dimension = 4,
+    size = 150,
+    speed= 100
+  ) {
+    this.colors = colors;
+    this.dimension = dimension;
+    this.size = size;
+    this.speed = speed;
+    this.selection = selection;
+    this.aistring = ai;
+  }
+
+  start(){
+    this.game = new Game(this.dimension, this.colors);
+    this.buildAI();
+    this.drawer = new Drawer(this.game, this.speed, this.selection, this.size);
+  }
+
+  oneStep() {
+    var one = this.ai.oneStep();
+    this.drawer.update();
+    return one;
+  }
+
+  buildAI(){
+    if (this.aistring == "basic") {
+      this.ai = new BasicAI(this.game, [this.game.world[0]], "red");
+    } else if (this.aistring == "greedyMaxCells") {
+      this.ai = new GreedyMaxCellsAI(this.game, [this.game.world[0]], "red");
+    } else if (this.aistring == "greedyMaxGroups") {
+      this.ai = new GreedyMaxGroupAI(this.game, [this.game.world[0]], "red");
+    }
+  }
+
+}
+
+class VersusGame {
+  colors: number;
+  dimension: number;
+  size: number;
+  speed: number;
+  game: Game;
+  ai1string: string;
+  ai1: AI;
+  ai2string: string;
+  ai2: AI;
+  drawer: Drawer;
+  selection: string;
+
+  constructor(
+    ai1: string,
+    ai2: string,
+    selection: string,
+    colors = 4,
+    dimension = 4,
+    size = 150,
+    speed= 100
+  ) {
+    this.colors = colors;
+    this.dimension = dimension;
+    this.size = size;
+    this.speed = speed;
+    this.selection = selection;
+    this.ai1string = ai1;
+    this.ai2string = ai2;
+  }
+
+  start(){
+    this.game = new Game(this.dimension, this.colors);
+    this.ai1 = this.buildAI(this.ai1string, 0, "red");
+    this.ai2 = this.buildAI(this.ai2string, this.dimension*this.dimension - 1, "blue");
+    this.drawer = new Drawer(this.game, this.speed, this.selection, this.size);
+    this.drawer.update();
+  }
+
+  buildAI(aistring: string, start: number, color: string){
+    if (aistring == "basic") {
+      return new BasicAI(this.game, [this.game.world[start]], color);
+    } else if (aistring == "greedyMaxCells") {
+      return new GreedyMaxCellsAI(this.game, [this.game.world[start]], color);
+    } else if (aistring == "greedyMaxGroups") {
+      return new GreedyMaxGroupAI(this.game, [this.game.world[start]], color);
+    }
+  }
+
+  oneStep() {
+    var one = this.ai1.oneStep();
+    var two = this.ai2.oneStep();
+    this.drawer.update();
+    return one || two;
+  }
+
+  launch() {
+    if (this.oneStep()) {
+      setTimeout(() => {this.launch()}, this.speed);
+    }
+  }
+}
+
+class HumanGame {
+  colors: number;
+  dimension: number;
+  size: number;
+  game: Game;
+  ai1string: string;
+  ai1: AI;
+  drawer: Drawer;
+  selection: string;
+  speed: number;
+  human : AI;
+  displayStats: any;
+  statsSelection: string;
+
+  constructor(
+    ai1: string,
+    selection: string,
+    statsSelection: string,
+    colors = 7,
+    dimension = 20,
+    size = 500
+  ) {
+    this.colors = colors;
+    this.dimension = dimension;
+    this.size = size;
+    this.selection = selection;
+    this.ai1string = ai1;
+    this.speed = 100;
+    this.statsSelection = statsSelection;
+
+  }
+
+  start(){
+    this.displayStats = d3.select(this.statsSelection);
+    this.game = new Game(this.dimension, this.colors);
+    this.ai1 = this.buildAI(this.ai1string, this.dimension * this.dimension - 1, "blue");
+    this.human = this.buildAI("human", 0, "red");
+    this.game.world[0].owner = "red";
+    this.drawer = new Drawer(this.game, this.speed, this.selection, this.size);
+    this.drawer.update();
+    this.drawer.svgDatas.on("click", (d) => {
+      // check if d is in the candidates
+      if (this.human.extend(d)){
+        // ai step
+        this.ai1.oneStep();
+        this.drawer.update();
+        var stats = this.stats();
+        var color = "red";
+        if (stats.human >= stats.ai) {
+          color = "red"
+        } else {
+          color = "blue"
+        }
+        this.displayStats.style("background-color", color)
+      };
+
+    });
+  }
+
+  buildAI(aistring: string, start: number, color: string){
+    if (aistring == "basic") {
+      return new BasicAI(this.game, [this.game.world[start]], color);
+    } else if (aistring == "greedyMaxCells") {
+      return new GreedyMaxCellsAI(this.game, [this.game.world[start]], color);
+    } else if (aistring == "greedyMaxGroups") {
+      return new GreedyMaxGroupAI(this.game, [this.game.world[start]], color);
+    } else if (aistring == "human") {
+      return new HumanAI(this.game, [this.game.world[start]], color);
+    }
+  }
+
+  stats() {
+    return {
+      human: this.human.zone.length,
+      ai: this.ai1.zone.length
+    }
+  }
+
+}
+
+var ruleGame = new ExampleGame(
+  "basic",
+  "#rules"
+);
+
+var stratRandomGame = new ExampleGame(
+  "basic",
+  "#strat-random"
+);
+
+var stratGreedyMaxCellsGame = new ExampleGame(
+  "greedyMaxCells",
+  "#strat-greedy-max-cells"
+);
+
+var stratGreedyMaxGroupsGame = new ExampleGame(
+  "greedyMaxGroups",
+  "#strat-greedy-max-groups",
+  5
+);
+
+var gameIllustration = new VersusGame(
+  "basic",
+  "basic",
+  "#game-illustration"
+)
+
+var matchRandomGreedyCells = new VersusGame(
+  "basic",
+  "greedyMaxCells",
+  "#match-random-vs-greedy-cells",
+  7,
+  50,
+  300,
+  50
+)
+
+var matchRandomGreedyGroups = new VersusGame(
+  "greedyMaxCells",
+  "greedyMaxGroups",
+  "#match-random-vs-greedy-groups",
+  7,
+  50,
+  300,
+  50
+)
+
+var matchHumanGreedyCells = new HumanGame(
+  "greedyMaxCells",
+  "#match-human-vs-greedy-cells",
+  "#stats-match-human-vs-greedy-cells"
+)

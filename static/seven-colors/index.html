@@ -1,159 +1,165 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<script src="js/d3.min.js"></script>
+<script src="js/underscore-min.js"></script>
+<script src="js/built/seven.js"></script>
 <style>
-  .counter0{
-    color: blue;
-  }
-  .counter1{
+  .red{
     color: red;
   }
+  .blue{
+    color: blue;
+  }
+  .winner{
+    color:white;
+    padding: 2px;
+  }
+  .footer {
+    font-size: xx-small;
+  }
+
 </style>
 <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
 <body>
   <div class="container">
     <h1>The 7 colors game</h1>
     <p>
-    Originally from <a href="http://people.irisa.fr/Anne-Cecile.Orgerie/">Anne-Cécile Orgerie</a>
-    and <a href=http://people.irisa.fr/Martin.Quinson/>Martin Quinson</a> for a C programming course.
-    Rewritten here in <a href="https://d3js.org">D3js</a> (without AI).
+      The game originated from a C programming course from <a href="http://people.irisa.fr/Anne-Cecile.Orgerie/">Anne-Cécile Orgerie</a> and
+      <a href=http://people.irisa.fr/Martin.Quinson/>Martin Quinson</a>. The original subject is available <a href="http://people.irisa.fr/Anne-Cecile.Orgerie/tp4.pdf">here</a>.
+      We present here a version rewritten in <a href="https://d3js.org">D3js</a> and <a href="http://www.typescriptlang.org/">Typescript</a>.
     </p>
+
+    <h3>Goal & Rules</h3>
     <div class="row">
-    <div class="col-md-1 counter0">Player 1 : <span id="counter0"></span></div>
-    <div class="col-md-1 counter1">Player 2 : <span id="counter1"></span></div>
+      <div class="col-md-6 col-xs-6" >
+        <p>
+          The game is made of cells forming a grid. Each cell has a color choosen in a range of 7 colors.
+          The players control a zone and can extend it. To extend his zone, a player
+          choose a color and all the adjacent cells of his controlled zone with this
+          color will be added to it.
+        </p>
+        <p>
+          The right part is an illustration of a player extending his zone.
+        </p>
+      </div>
+      <div class="col-md-6 col-xs-4">
+        <div id="rules"></div>
+        <div>
+          <a href=# onclick="ruleGame.start();">restart</a> /
+          <a href=# onclick="ruleGame.oneStep();">step</a>
+        </div>
+        <script>
+        ruleGame.start();
+        </script>
+      </div>
+    </div><!-- row -->
+      <div class="row">
+        <div class="col-md-2 col-xs-4 col-md-offset-2 col-xs-offset-2">
+          <div id="game-illustration"></div>
+          <div>
+            <a href=# onclick="gameIllustration.start(); return false;">restart</a> /
+            <a href=# onclick="gameIllustration.oneStep(); return false;">step</a>
+          </div>
+          <script>
+            gameIllustration.start();
+          </script>
+        </div>
+        <div class="col-md-6 col-xs-6">
+          Usually two players play against each other and the winner is the one who
+          controls the largest area at the end - when no more moves is possible for both players.
+
+        </div>
+      </div>
+      <div class="row">
+        <h3>Some simple strategies</h3>
+      <div class="col-md-3 col-xs-4">
+        <h5>Random</h5>
+        The player choose randomly how to extend his zone, regardless how many cells will abe ctually added.
+        <div id="strat-random"></div>
+        <script>
+        stratRandomGame.start();
+        </script>
+        <div>
+          <a href="#"onclick="stratRandomGame.start();return false;">restart</a> /
+          <a href="#" onclick="stratRandomGame.oneStep(); return false;">step</a>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-xs-4">
+        <h5>Greedy cells</h5>
+        The player choose the color which maximize the number of cells added to his zone.
+        <div id="strat-greedy-max-cells"></div>
+        <script>
+        stratGreedyMaxCellsGame.start();
+        </script>
+        <div>
+          <a href="#"onclick="stratGreedyMaxCellsGame.start();return false;">restart</a> /
+          <a href="#" onclick="stratGreedyMaxCellsGame.oneStep(); return false;">step</a>
+        </div>
+      </div>
+      <div class="col-md-3 col-xs-4">
+        <h5>Greedy groups</h5>
+        The player choose the color which maximize the number of new groups added to his zone.
+        <div id="strat-greedy-max-groups"></div>
+        <script>
+        stratGreedyMaxGroupsGame.start();
+        </script>
+        <div>
+          <a href="#"onclick="stratGreedyMaxGroupsGame.start();return false;">restart</a> /
+          <a href="#" onclick="stratGreedyMaxGroupsGame.oneStep(); return false;">step</a>
+        </div>
+      </div>
+      </div>
+
+    <div class="row">
+      <h3>What is the best strategy ?</h3>
+      This is a hard question since there are a lot of possible strategies and a good
+      strategy is probably made of different ones. But let's do something simple : comparing the above strategies.
+
+      <div class="col-md-6 col-xs-6">
+        <h5><span class="red">Random</span> VS <span class="blue">Greedy max cells</span></h5>
+        <div id="match-random-vs-greedy-cells">
+        </div>
+        <script>
+        matchRandomGreedyCells.start();
+        </script>
+        <div>
+          <a href="#"onclick="matchRandomGreedyCells.start();return false;">restart</a> /
+          <a href="#"onclick="matchRandomGreedyCells.launch();return false;">launch</a>
+        </div>
+      </div>
+      <div class="col-md-6 col-xs-6">
+        <h5><span class="red">Greedy max cells </span> VS <span class="blue">Greedy max groups</span></h5>
+        <div id="match-random-vs-greedy-groups">
+        </div>
+        <script>
+        matchRandomGreedyGroups.start();
+        </script>
+        <div>
+          <a href="#"onclick="matchRandomGreedyGroups.start();return false;">restart</a> /
+          <a href="#"onclick="matchRandomGreedyGroups.launch();return false;">launch</a>
+        </div>
+      </div>
     </div>
-    <div id="graph"></div>
+    <div>
+    <div class="row">
+      <h3> Challenge the Greedy player </h3>
+      Will you beat the AI ?
+
+      <div class="text-center">
+      <span id="stats-match-human-vs-greedy-cells" class="winner">WINNER</span>
+      <div id="match-human-vs-greedy-cells"></div>
+    </div>
+      <script>
+      matchHumanGreedyCells.start();
+      </script>
+    </div>
+
 
     <div class="footer">
-      Matthieu Simonin
+      Matthieu Simonin - files <a href="js/seven.ts">seven.ts(typescript)</a>.
     </div>
 </div>
-  <script src="js/underscore-min.js"></script>
-  <script src="js/d3.min.js"></script>
-  <script>
-    var COLORS=7;
-    var NB = 10;
 
-    // in pixel
-    var SIZE = 500;
-    var SQUARE = SIZE/NB;
 
-    var datas = [];
-
-    _.range(NB).forEach(function(y){
-      _.range(NB).forEach(function(x) {
-        datas.push({
-            value : Math.floor(COLORS * Math.random()),
-            x: x,
-            y: y,
-            owner: -1
-          });
-        })
-    });
-    datas[0].owner = 0;
-    var zone = [
-      [datas[0]],
-      [datas[NB * NB - 1]]
-    ];
-
-    var player = 0;
-    var scale = d3.scale.linear().domain([0, NB]).range([0, SIZE]);
-    var color = d3.scale.category10();
-
-    var svg = d3.select("#graph")
-      .append("svg")
-      .attr("width", SIZE)
-      .attr("height", SIZE);
-
-    var svgDatas = svg.selectAll("rect").data(datas);
-
-    svgDatas.enter()
-      .append("rect")
-      .attr("x", function(d){return scale(d.x)})
-      .attr("y", function(d){return scale(d.y)})
-      .attr("width", SQUARE)
-      .attr("height", SQUARE);
-
-      updateCounter()
-      draw();
-
-      function draw() {
-        svgDatas
-        .style("fill", function(d){
-            if (_.contains(zone[0], d))
-              return "blue";
-            if (_.contains(zone[1], d))
-              return "red";
-            return color(d.value)})
-          .style("opacity", function(d){
-            if (_.contains(zone[0], d))
-              return 1;
-            if (_.contains(zone[1], d))
-              return 1;
-            return 0.6
-          })
-          .on("mouseover", function(d){
-            var color = "red";
-            if (canExtend(d, player,d)) {
-              color = "green";
-            }
-            d3.select(this)
-              .style("stroke", color)
-              .style("stroke-width", "5");
-          })
-          .on("mouseout", function(d) {
-            d3.select(this)
-              .style("stroke-width", 0);
-          })
-          .on("click", function(d){
-            if (canExtend(d, player,d)) {
-              extend(d, player);
-              draw();
-              updateCounter();
-              player = 1 - player;
-            }
-          });
-        };
-
-      function updateCounter(){
-        d3.select("#counter0").text(" " + ((zone[0].length / (NB * NB)) * 100).toFixed(1) + "%");
-        d3.select("#counter1").text(" " + ((zone[1].length / (NB * NB)) * 100).toFixed(1) + "%");
-      }
-
-      //true iff d is one of the neighbour of
-      // already controlled zone.
-      function neighbour(d, player) {
-        return zone[player].some(function(z) {
-          var test =
-          ((z.x === d.x && z.y  ===  d.y + 1)
-          ||
-          (z.x === d.x && z.y  ===  d.y - 1)
-          ||
-          (z.x === d.x - 1 && z.y === d.y)
-          ||
-          (z.x === d.x + 1 && z.y === d.y));
-          return test;
-        });
-      }
-
-      // can the zone be extended with n according to the hovered d cells
-      // for player player
-      function canExtend(n, player, d) {
-        return neighbour(n, player) && n.owner < 0 && n.value == d.value;
-      }
-
-      // extends the zone for player player with all the cells with the
-      // same value as d
-      function extend(d, player) {
-        var nodes = datas.filter(function(n){return canExtend(n,player,d)});
-        while (nodes.length != 0) {
-          nodes.forEach(function(d) {
-            d.owner = player;
-            zone[player].push(d);
-          });
-          nodes = datas.filter(function(n){return canExtend(n,player,d)});
-        }
-        draw();
-      }
-
-  </script>
 </body>
