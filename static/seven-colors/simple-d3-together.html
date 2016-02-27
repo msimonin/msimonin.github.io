@@ -197,7 +197,7 @@
       // can the zone be extended with n according to the hovered d cells
       // for player player
       function canExtend(n, player, d, team) {
-        return team == player && neighbour(n, player) && n.owner < 0 && n.value == d.value;
+        return team === player && neighbour(n, player) && n.owner < 0 && n.value == d.value;
       }
 
       // extends the zone for player player with all the cells with the
@@ -213,15 +213,22 @@
           nodes = datas.filter(function(n){return canExtend(n,player,d, team)});
         }
         draw();
-        TogetherJS.send({type: "update", datas: datas, player : 1 - player});
+        sendToTogether({type: "update", datas: datas, player : 1 - player})
       }
 
       function changeTeam(t) {
-        team = t;
+        team = parseInt(t);
         document.getElementById("team"+team).setAttribute("class", "counter"+ team + " activated");
         document.getElementById("team"+(1-team)).setAttribute("class", "counter"+ (1-team));
-        TogetherJS.send({type: "team", team: team});
+        sendToTogether({type: "team", team: team})
       }
+
+      function sendToTogether(msg){
+        if (TogetherJS.running){
+          TogetherJS.send(msg);
+        }
+      }
+
 
   </script>
 
