@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  .counter0{
+    color: blue;
+  }
+  .activated{
+    border: 1px solid green;
+  }
+  .counter1{
+    color: red;
+  }
+
+  #team-changes{
+    overflow: auto;
+    height: 100px;
+  }
+</style>
+<link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
+<script src="https://togetherjs.com/togetherjs-min.js"></script>
+
+<body>
+  <div class="container">
+    <h1>The 7 colors game</h1>
+    <p>
+    Originally from <a href="http://people.irisa.fr/Anne-Cecile.Orgerie/">Anne-Cécile Orgerie</a>
+    and <a href=http://people.irisa.fr/Martin.Quinson/>Martin Quinson</a> for a C programming course.
+    Rewritten here in <a href="https://d3js.org">D3js</a> (without AI).
+    </p>
+    <div class="row">
+      <div class="col-md-4 col-xs-6">
+        <p>
+          Invite a remote player : <button class="btn btn-default" onclick="TogetherJS(this); return false;">Start TogetherJS</button>
+        </p>
+        <p>
+          Choose a team
+           <a id="team0" href="#" onclick="changeTeam(0);return false;" class="counter0 activated">team 0 : blue</a> or
+           <a id="team1" href="#" onclick="changeTeam(1);return false;" class="counter1">team 1 : red</a>
+        <p>
+        </div>
+        <div class="col-md-8 col-xs-6" id="team-changes">
+        </div>
+    </div>
+    <div class="row">
+    <div class="col-md-1 counter0">Player 1 : <span id="counter0"></span></div>
+    <div class="col-md-1 counter1">Player 2 : <span id="counter1"></span></div>
+    </div>
+    <div id="graph"></div>
+
+    <div class="footer">
+      Matthieu Simonin
+    </div>
+</div>
+  <script src="js/underscore-min.js"></script>
+  <script src="js/d3.min.js"></script>
+  <script>
+
+
+  TogetherJS.hub.on("togetherjs.hello", function (msg) {
+    console.log("togetherjs.hello");
+    // send the state when someone join
+    TogetherJS.send({type: "update", datas: datas, player : player});
+  });
+
+
+  TogetherJS.hub.on("team", function (msg) {
+    var div = document.getElementById("team-changes");
+    div.innerHTML = "<p>"+msg.peer.name + " joins  the team " + msg.team + "</p>" + div.innerHTML;
+    });
+
+  TogetherJS.hub.on("update", function (msg) {
+    console.log("update");
+    console.log(msg);
+    datas = msg.datas;
+    // rebind since we change the ref
+    svg.selectAll("rect").data(datas, function(d){return d.x + "-" + d.y});
+    // rebuild the zones
+    zone[0] = datas.filter(function(d){return d.owner === 0});
+    zone[1] = datas.filter(function(d){return d.owner === 1});
+    draw();
+    updateCounter();
+    player = msg.player;
+  });
+
+    var COLORS=7;
+    var NB = 10;
+
+    // in pixel
+    var SIZE = 500;
+    var SQUARE = SIZE/NB;
+
+    var datas = [];
+
+    _.range(NB).forEach(function(y){
+      _.range(NB).forEach(function(x) {
+        datas.push({
+            value : Math.floor(COLORS * Math.random()),
+            x: x,
+            y: y,
+            owner: -1
+          });
+        })
+    });
+    var zone = [
+      [datas[0]],
+      [datas[NB * NB - 1]]
+    ];
+    zone[0][0].owner = 0;
+    zone[1][0].owner = 1;
+    var player = 0;
+    var team = 0;
+    var scale = d3.scale.linear().domain([0, NB]).range([0, SIZE]);
+
+    var color = d3.scale.ordinal()
+      .domain([0,1,2,3,4,5,6])
+      .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2"]);
+
+    var svg = d3.select("#graph")
+      .append("svg")
+      .attr("width", SIZE)
+      .attr("height", SIZE);
+
+    var svgDatas = svg.selectAll("rect").data(datas, function(d){return d.x + "-" + d.y});
+
+    svgDatas.enter()
+      .append("rect")
+      .attr("x", function(d){return scale(d.x)})
+      .attr("y", function(d){return scale(d.y)})
+      .attr("width", SQUARE)
+      .attr("height", SQUARE);
+
+      updateCounter()
+      draw();
+
+      function draw() {
+        console.log("redrawing");
+        svgDatas
+        .style("fill", function(d){
+            if (_.contains(zone[0], d))
+              return "blue";
+            if (_.contains(zone[1], d))
+              return "red";
+            return color(d.value)})
+          .style("opacity", function(d){
+            if (_.contains(zone[0], d))
+              return 1;
+            if (_.contains(zone[1], d))
+              return 1;
+            return 0.6
+          })
+          .on("mouseover", function(d){
+            var color = "red";
+            if (canExtend(d, player,d, team)) {
+              color = "green";
+            }
+            d3.select(this)
+              .style("stroke", color)
+              .style("stroke-width", "5");
+          })
+          .on("mouseout", function(d) {
+            d3.select(this)
+              .style("stroke-width", 0);
+          })
+          .on("click", function(d){
+            var c = canExtend(d, player, d, team);
+            console.log(c);
+            if (c) {
+              extend(d, player, team);
+              draw();
+              updateCounter();
+              player = 1 - player;
+            }
+          });
+        };
+
+      function updateCounter(){
+        d3.select("#counter0").text(" " + ((zone[0].length / (NB * NB)) * 100).toFixed(1) + "%");
+        d3.select("#counter1").text(" " + ((zone[1].length / (NB * NB)) * 100).toFixed(1) + "%");
+      }
+
+      //true iff d is one of the neighbour of
+      // already controlled zone.
+      function neighbour(d, player) {
+        return zone[player].some(function(z) {
+          var test =
+          ((z.x === d.x && z.y  ===  d.y + 1)
+          ||
+          (z.x === d.x && z.y  ===  d.y - 1)
+          ||
+          (z.x === d.x - 1 && z.y === d.y)
+          ||
+          (z.x === d.x + 1 && z.y === d.y));
+          return test;
+        });
+      }
+
+      // can the zone be extended with n according to the hovered d cells
+      // for player player
+      function canExtend(n, player, d, team) {
+        return team == player && neighbour(n, player) && n.owner < 0 && n.value == d.value;
+      }
+
+      // extends the zone for player player with all the cells with the
+      // same value as d
+      function extend(d, player, team) {
+        var nodes = datas.filter(function(n){return canExtend(n,player,d, team)});
+        while (nodes.length != 0) {
+          nodes.forEach(function(d) {
+            d.owner = player;
+            console.log(d);
+            zone[player].push(d);
+          });
+          nodes = datas.filter(function(n){return canExtend(n,player,d, team)});
+        }
+        draw();
+        TogetherJS.send({type: "update", datas: datas, player : 1 - player});
+      }
+
+      function changeTeam(t) {
+        team = t;
+        document.getElementById("team"+team).setAttribute("class", "counter"+ team + " activated");
+        document.getElementById("team"+(1-team)).setAttribute("class", "counter"+ (1-team));
+        TogetherJS.send({type: "team", team: team});
+      }
+
+  </script>
+
+</body>
