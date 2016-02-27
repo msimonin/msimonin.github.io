@@ -105,7 +105,7 @@ class BasicAI implements AI {
     return found;
   }
   /*
-  *
+  * value -> [[connex1],[connex2], connex3]
   */
   getCandidates() {
     var candidates = {}
@@ -192,6 +192,42 @@ class GreedyMaxCellsAI extends BasicAI {
       .map(function(k,i) {return candidates[k]})
 
     // we pick the groups which have the most connex part
+    // this is a flatten
+    var groups = values.map(
+      function(g) {
+        return _.flatten(g)
+      }
+    )
+
+    var group = _.max(groups, function(d){return d.length});
+    for (var g in group) {
+      var choice = group[g];
+      choice.owner = this.color;
+      this.zone.push(choice);
+    }
+    return true;
+  }
+}
+
+class RusherAI extends BasicAI {
+  constructor(game: Game, zone: Cell[], color: string) {
+    super(game, zone, color);
+  }
+
+  // the AI plays
+  oneStep() : boolean {
+    // old the closest possible neighbours of the controlled zone
+
+    var candidates = this.getCandidates();
+    var keys = Object.keys(candidates);
+    if (keys.length == 0) {
+      return false;
+    }
+
+    var values = keys
+      .map(function(k,i) {return candidates[k]})
+
+    // we pick the groups which have the most connex part
     var groups = values.map(
       function(g) {
         return g.reduce(function(p,c){
@@ -212,6 +248,7 @@ class GreedyMaxCellsAI extends BasicAI {
     return true;
   }
 }
+
 
 class Game {
   dimension: number;
@@ -404,6 +441,13 @@ class ExampleGame {
 
 }
 
+enum GameState {
+    Created,
+    Started,
+    Running,
+    Finished,
+}
+
 class VersusGame {
   colors: number;
   dimension: number;
@@ -422,6 +466,8 @@ class VersusGame {
   scoreSelection: string;
   ai1Score: number;
   ai2Score: number;
+  state: GameState;
+  nextIteration: any;
 
   constructor(
     ai1: string,
@@ -445,9 +491,13 @@ class VersusGame {
     this.ai1Score = 0;
     this.ai2Score = 0;
     this.scoreSelection = scoreSelection;
+    this.state = GameState.Created;
+
   }
 
   start(){
+    //remove the previous next step for the ais.
+    clearTimeout(this.nextIteration);
     this.game = new Game(this.dimension, this.colors);
     this.displayStats = d3.select(this.statsSelection);
     this.displayScore = d3.select(this.scoreSelection);
@@ -475,6 +525,8 @@ class VersusGame {
       });
     }
     this.drawer.update();
+
+    this.state = GameState.Started;
   }
 
   buildAI(aistring: string, start: number, color: string){
@@ -497,11 +549,15 @@ class VersusGame {
   }
 
   launch() {
-    if (this.oneStep()) {
-      setTimeout(() => {this.launch()}, this.speed);
-    } else {
-      this.updateScore();
+    switch(this.state) {
+      case GameState.Started:
+        this.state = GameState.Running;
+        this._launch();
+        break;
+      default:
+        return;
     }
+
   }
 
   updateScore() {
@@ -515,14 +571,20 @@ class VersusGame {
     `<span class="${this.ai1.color}">${this.ai1Score}</span>
     /
     <span class="${this.ai2.color}">${this.ai2Score}</span>`);
-
-
   }
 
   launchFast(){
-    while(this.oneStep()){
+    switch(this.state) {
+      case GameState.Started:
+        this.state = GameState.Running;
+        while(this.oneStep()){
+        }
+        this.updateScore();
+        break;
+      default:
+        return;
     }
-    this.updateScore();
+
   }
 
   currentStats() {
@@ -534,6 +596,15 @@ class VersusGame {
 
   globalStats(){
 
+  }
+
+  _launch(){
+    if (this.oneStep()) {
+      this.nextIteration = setTimeout(() => {this._launch()}, this.speed);
+    } else {
+      this.updateScore();
+      this.state = GameState.Finished
+    }
   }
 
 }
