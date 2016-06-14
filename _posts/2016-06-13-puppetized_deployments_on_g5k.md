@@ -6,7 +6,7 @@ categories:
 ---
 
 Lately, the project [xp5k-openstack](https://github.com/grid5000/xp5k-openstack) has been
-released.  It deploys OpenStack on [Grid'5000](https://www.grid5000.fr) and act as a wrapper around two
+released.  It deploys OpenStack on [Grid'5000](https://www.grid5000.fr) and acts as a wrapper around two
 main components :
 
 * The Grid'5000 REST API
