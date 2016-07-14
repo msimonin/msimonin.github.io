@@ -328,7 +328,7 @@
         usersTable /* dc.dataTable('.dc-data-table', 'chartGroup') */
             .dimension(usersGroup)
             .group(function(d) {return d})
-            .size(100)
+            .size(500)
             .columns([
                 function(d) {return d.key.substring(0,8)},
                 function(d) {return d.value.jobs},
