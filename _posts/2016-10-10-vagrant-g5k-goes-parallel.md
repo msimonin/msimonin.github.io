@@ -5,8 +5,6 @@ date:   2016-10-10 6:30:00
 categories:
 ---
 
-# Vagrant-g5k goes parallel
-
 Version [0.0.15](https://github.com/msimonin/vagrant-g5k/tree/0.0.15) introduces the ability to boot VMs in parallel. Let's have an example
 
 ## Vagrantfile
