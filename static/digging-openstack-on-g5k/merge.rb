@@ -1,7 +1,7 @@
 
 require 'json'
 
-sites=%w(nantes rennes lyon nancy sophia reims grenoble lille luxembourg)
+sites=%w(nantes rennes lyon nancy sophia reims grenoble lille luxembourg toulouse)
 
 allJobs = []
 sites.each do |site|
